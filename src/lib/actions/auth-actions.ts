@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 
 import { ensureParentConsent, ensureTeacherConsent } from "@/lib/consent";
 import { setSession, clearSession } from "@/lib/auth/session";
+import { getTeacherDisplayName } from "@/lib/config/teachers";
 import { ensureClassSchedule } from "@/lib/schedule";
 import { prisma } from "@/lib/db/prisma";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
@@ -160,7 +161,7 @@ export async function teacherLoginAction(
     userType: UserType.TEACHER,
     grade: teacher.grade,
     classroom: teacher.classroom,
-    displayName: teacher.teacherName,
+    displayName: getTeacherDisplayName(teacher.teacherName),
   });
 
   redirect("/teacher/dashboard");

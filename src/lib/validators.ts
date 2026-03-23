@@ -46,6 +46,10 @@ export const teacherSlotToggleSchema = z.object({
   slotId: z.string().cuid("잘못된 슬롯 요청입니다."),
 });
 
+export const teacherDateAvailabilitySchema = z.object({
+  dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "날짜 형식을 다시 확인해주세요."),
+});
+
 export const teacherWeekConfigSchema = z.object({
   weekKey: z.string().min(1, "주차를 선택해주세요."),
   slotIntervalMinutes: z.coerce

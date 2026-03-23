@@ -197,6 +197,8 @@ export async function bookReservationAction(
   revalidatePath("/reserve");
   revalidatePath("/dashboard");
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/teacher/settings");
+  revalidatePath("/teacher/availability");
 
   return {
     status: "success",
@@ -274,6 +276,8 @@ export async function deleteReservationAction(
   revalidatePath("/reserve");
   revalidatePath("/dashboard");
   revalidatePath("/teacher/dashboard");
+  revalidatePath("/teacher/settings");
+  revalidatePath("/teacher/availability");
 
   return {
     status: "success",

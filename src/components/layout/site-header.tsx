@@ -26,7 +26,7 @@ export async function SiteHeader({ currentPath }: SiteHeaderProps) {
 
   const links =
     session?.userType === "TEACHER"
-      ? [{ href: "/teacher/dashboard", label: "교사 대시보드", icon: GraduationCap }]
+      ? [{ href: "/teacher/dashboard", label: "교사 포털", icon: GraduationCap }]
       : [
           { href: "/", label: "소개", icon: BookOpen },
           { href: "/reserve", label: "예약", icon: CalendarRange },
@@ -56,7 +56,11 @@ export async function SiteHeader({ currentPath }: SiteHeaderProps) {
           <div className="flex items-center gap-1">
             {links.map((link) => {
               const Icon = link.icon;
-              const active = currentPath === link.href;
+              const active =
+                currentPath === link.href ||
+                (session?.userType === "TEACHER" &&
+                  currentPath?.startsWith("/teacher/") &&
+                  link.href === "/teacher/dashboard");
 
               return (
                 <Link

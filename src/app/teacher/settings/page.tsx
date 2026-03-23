@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 
-import { TeacherDashboardClient } from "@/components/teacher/teacher-dashboard-client";
 import { TeacherPageShell } from "@/components/teacher/teacher-page-shell";
+import { TeacherSettingsClient } from "@/components/teacher/teacher-settings-client";
 import { requireTeacherSession } from "@/lib/auth/guards";
 import { getTeacherDashboardData } from "@/lib/data/portal";
 
-export default async function TeacherDashboardPage() {
+export default async function TeacherSettingsPage() {
   const session = await requireTeacherSession();
   const data = await getTeacherDashboardData(session.userId);
 
@@ -15,14 +15,14 @@ export default async function TeacherDashboardPage() {
 
   return (
     <TeacherPageShell
-      currentPath="/teacher/dashboard"
-      title="교사 대시보드"
-      description="알림과 핵심 운영 지표만 먼저 확인할 수 있도록 구성했습니다. 세부 조정은 상담 설정과 날짜 조정 페이지에서 이어서 처리하면 됩니다."
+      currentPath="/teacher/settings"
+      title="상담 설정"
+      description="주차별 운영 시간을 차분하게 조정할 수 있게 입력 흐름을 단순화했습니다. 예약이 이미 들어간 주차는 혼선을 막기 위해 잠금 상태로 표시합니다."
       teacherName={data.teacher.name}
       classLabel={data.teacher.classLabel}
       unreadCount={data.unreadCount}
     >
-      <TeacherDashboardClient data={data} />
+      <TeacherSettingsClient data={data} />
     </TeacherPageShell>
   );
 }
