@@ -4,12 +4,13 @@ import { Bell, CalendarClock, GraduationCap, Settings2 } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const TEACHER_PAGE_LINKS = [
   { href: "/teacher/dashboard", label: "대시보드", icon: GraduationCap },
   { href: "/teacher/settings", label: "상담 설정", icon: Settings2 },
-  { href: "/teacher/availability", label: "날짜 조정", icon: CalendarClock },
+  { href: "/teacher/availability", label: "일정 관리", icon: CalendarClock },
 ] as const;
 
 type TeacherPageShellProps = {
@@ -36,47 +37,54 @@ export function TeacherPageShell({
   return (
     <main className="min-h-screen">
       <SiteHeader currentPath={currentPath} />
-      <section className="mx-auto w-full max-w-[980px] px-5 py-8 sm:px-8">
+      <section className="mx-auto w-full max-w-[1180px] px-5 py-8 sm:px-8">
         <div className="grid gap-5">
-          <header className="overflow-hidden rounded-[1.75rem] border border-[color:var(--primary)]/20 bg-gradient-to-br from-[color:var(--primary)] via-[color:var(--primary)] to-[color:var(--primary-dim)] p-6 text-white shadow-[0_18px_48px_rgba(30,57,75,0.14)] sm:p-8">
-            <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div className="max-w-2xl">
-                  <span className="inline-flex rounded-full border border-white/18 bg-white/12 px-3 py-1 text-sm font-semibold text-white">
-                    교사 포털
-                  </span>
-                  <h1 className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">
-                    {title}
-                  </h1>
-                  <p className="mt-3 text-sm leading-6 text-white/78 sm:text-[0.95rem]">
-                    {description}
-                  </p>
+          <header className="overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-[0_20px_60px_rgba(30,57,75,0.08)]">
+            <div className="px-6 py-7 sm:px-8 sm:py-8">
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="max-w-2xl">
+                    <Badge
+                      variant="primary"
+                      className="rounded-full px-4 py-1.5 font-bold tracking-[0.16em] uppercase"
+                    >
+                      Teacher Portal
+                    </Badge>
+                    <h1 className="mt-4 font-display text-3xl font-extrabold tracking-[-0.04em] text-[color:var(--text-strong)] sm:text-4xl">
+                      {title}
+                    </h1>
+                    <p className="mt-3 text-sm leading-6 text-[color:var(--text-soft)] sm:text-[0.95rem]">
+                      {description}
+                    </p>
+                  </div>
+                  {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
                 </div>
-                {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
-              </div>
 
-              <div className="flex flex-wrap gap-2 border-t border-white/14 pt-5">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-2 text-sm text-white">
-                  <GraduationCap className="h-4 w-4 text-white" />
-                  {classLabel}
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-2 text-sm text-white">
-                  담당 교사 {teacherName}
-                </span>
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm",
-                    unreadCount > 0
-                      ? "bg-white text-[color:var(--primary)]"
-                      : "bg-white/12 text-white",
-                  )}
-                >
-                  <Bell className="h-4 w-4" />
-                  읽지 않은 알림 {unreadCount}건
-                </span>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface-container-low)] px-4 py-2 text-sm font-semibold text-[color:var(--text-strong)]">
+                    <GraduationCap className="h-4 w-4 text-[color:var(--primary)]" />
+                    {classLabel}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface-container-low)] px-4 py-2 text-sm font-semibold text-[color:var(--text-strong)]">
+                    담당 교사 {teacherName}
+                  </span>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold",
+                      unreadCount > 0
+                        ? "bg-[color:var(--primary-container)] text-[color:var(--on-primary-container)]"
+                        : "bg-[color:var(--surface-container-low)] text-[color:var(--text-soft)]",
+                    )}
+                  >
+                    <Bell className="h-4 w-4" />
+                    읽지 않은 알림 {unreadCount}건
+                  </span>
+                </div>
               </div>
+            </div>
 
-              <nav className="flex flex-wrap gap-2 border-t border-white/14 pt-5">
+            <div className="border-t border-black/5 bg-slate-50/60 px-6 py-4 sm:px-8">
+              <nav className="flex flex-wrap gap-2">
                 {TEACHER_PAGE_LINKS.map((link) => {
                   const Icon = link.icon;
                   const active = currentPath === link.href;
@@ -88,8 +96,8 @@ export function TeacherPageShell({
                       className={cn(
                         "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                         active
-                          ? "bg-white text-[color:var(--primary)]"
-                          : "bg-white/10 text-white hover:bg-white/18",
+                          ? "bg-[color:var(--primary)] text-white shadow-sm"
+                          : "bg-white text-[color:var(--text-soft)] ring-1 ring-inset ring-[color:var(--surface-container-high)] hover:text-[color:var(--text-strong)]",
                       )}
                     >
                       <Icon className="h-4 w-4" />

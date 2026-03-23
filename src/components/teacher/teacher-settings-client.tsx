@@ -57,9 +57,19 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
 
   return (
     <div className="grid gap-4">
-      <Card className="border border-[color:var(--primary)]/20 bg-gradient-to-br from-[color:var(--primary)] via-[color:var(--primary)] to-[color:var(--primary-dim)] p-6 text-white shadow-[0_18px_48px_rgba(30,57,75,0.14)] sm:p-7">
-        <h2 className="text-xl font-semibold tracking-[-0.03em] text-white">주차별 시간 설정</h2>
-        <p className="mt-2 text-sm leading-6 text-white/78">간격, 시작, 종료 시간</p>
+      <Card className="overflow-hidden border border-black/5 bg-white p-0 shadow-[0_20px_60px_rgba(30,57,75,0.06)]">
+        <div className="px-6 py-6 sm:px-8 sm:py-8">
+          <Badge variant="primary" className="rounded-full px-4 py-1.5 font-bold tracking-[0.16em] uppercase">
+            Settings
+          </Badge>
+          <h2 className="mt-4 font-display text-3xl font-extrabold tracking-[-0.04em] text-[color:var(--text-strong)]">
+            주차별 상담 설정
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-[color:var(--text-soft)]">
+            시간 간격과 운영 시간을 주차별로 설정할 수 있습니다. 예약이 이미 있는 주차는 변경이
+            잠깁니다.
+          </p>
+        </div>
       </Card>
 
       {data.configs.map((config) => {
@@ -75,7 +85,7 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
         return (
           <Card
             key={config.id}
-            className="border border-black/5 bg-white p-6 shadow-[0_18px_48px_rgba(30,57,75,0.06)] sm:p-7"
+            className="border border-black/5 bg-white p-6 shadow-[0_20px_60px_rgba(30,57,75,0.06)] sm:p-7"
           >
             <form
               className="grid gap-5"
@@ -98,7 +108,9 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
                       <Badge variant="muted">편집 가능</Badge>
                     )}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">{week?.description ?? "-"}</p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
+                    {week?.description ?? "-"}
+                  </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -141,7 +153,9 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
 
               <div className="flex flex-col gap-3 border-t border-[color:var(--surface-container-high)] pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-[color:var(--text-soft)]">
-                  {locked ? "예약 존재" : "저장 시 슬롯 재생성"}
+                  {locked
+                    ? "예약이 있어 이 주차는 수정할 수 없습니다."
+                    : "저장하면 이 주차의 슬롯이 다시 생성됩니다."}
                 </p>
 
                 <Button

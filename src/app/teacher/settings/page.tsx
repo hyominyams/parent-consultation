@@ -17,7 +17,7 @@ export default async function TeacherSettingsPage() {
     <TeacherPageShell
       currentPath="/teacher/settings"
       title="상담 설정"
-      description="주차별 시간 간격과 운영 시간 설정"
+      description="주차별 시간 간격과 운영 시간을 설정합니다."
       teacherName={data.teacher.name}
       classLabel={data.teacher.classLabel}
       unreadCount={data.unreadCount}
