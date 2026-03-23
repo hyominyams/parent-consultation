@@ -14,10 +14,6 @@ export default async function ReservePage() {
     redirect("/auth");
   }
 
-  if (data.hasReservation) {
-    redirect("/dashboard");
-  }
-
   return (
     <main className="min-h-screen">
       <SiteHeader currentPath="/reserve" />

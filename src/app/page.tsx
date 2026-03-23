@@ -1,15 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Noto_Serif_KR } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import { ArrowRight, CalendarDays, ShieldCheck } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui/button";
 
-const heroTitleFont = Noto_Serif_KR({
+const heroTitleFont = Noto_Sans_KR({
   subsets: ["latin"],
   display: "swap",
+  weight: ["500", "700", "800"],
 });
 
 export default function HomePage() {
@@ -21,10 +22,10 @@ export default function HomePage() {
         {/* Full Wide Background Image */}
         <div className="absolute inset-0 -z-20 w-full h-full bg-[#f8fafb]">
           <Image
-            src="/korean_hero_16_9.png"
-            alt="Korean Hero Background"
+            src="/hero-learning-space.svg"
+            alt="Educational hero background"
             fill
-            className="object-cover opacity-60 mix-blend-multiply"
+            className="object-cover opacity-85 mix-blend-multiply"
             priority
           />
         </div>
@@ -37,7 +38,7 @@ export default function HomePage() {
         <div className="mb-8 mt-8 inline-flex items-center gap-2 rounded-full bg-[#dbebef]/80 px-3.5 py-1.5 transition-colors backdrop-blur-sm hover:bg-[#dbebef] md:mt-10">
           <CalendarDays className="h-[13px] w-[13px] text-[#4d7281]" />
           <span className="font-body text-[11px] font-semibold tracking-[0.14em] text-[#4d7281]">
-            상담 예약 기간 안내
+            2026학년도 1학기
           </span>
         </div>
 
@@ -45,13 +46,15 @@ export default function HomePage() {
         <div className="mb-6 flex max-w-[46rem] flex-col items-center">
           <p className="mb-4 inline-flex items-center gap-3 font-body text-[0.78rem] font-semibold tracking-[0.18em] text-[#5b7481] sm:text-[0.82rem]">
             <span className="h-px w-7 bg-[#9ab3be]" />
-            2026학년도 1학기
+            여수 신월초등학교
             <span className="h-px w-7 bg-[#9ab3be]" />
           </p>
           <h1
-            className={`${heroTitleFont.className} text-balance text-center text-[2.45rem] font-semibold leading-[1.22] tracking-[-0.055em] text-[#223038] sm:text-[3.1rem] md:text-[3.95rem]`}
+            className={`${heroTitleFont.className} text-balance text-center text-[2.45rem] font-bold leading-[1.1] tracking-[-0.035em] text-[#223038] sm:text-[3.15rem] md:text-[4.05rem]`}
           >
-            여수신월 <span className="whitespace-nowrap">학부모상담</span>
+            <span className="block whitespace-nowrap text-[#1f2d34]">
+              학부모상담 신청 프로그램
+            </span>
           </h1>
         </div>
 
@@ -132,14 +135,18 @@ export default function HomePage() {
           </div>
 
           {/* Card 4: Ready to start? (Bottom Right, 2 cols) */}
-          <div className="col-span-1 flex flex-col justify-between rounded-[2rem] bg-[#f5f7f9] p-8 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.04)] md:col-span-2 md:flex-row md:items-center">
-            <div className="w-full md:w-[50%] md:pr-10">
+          <div className="relative isolate col-span-1 flex flex-col justify-between overflow-hidden rounded-[2rem] bg-[#f5f7f9] p-8 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.04)] md:col-span-2 md:flex-row md:items-center">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 [background-image:linear-gradient(to_right,rgba(92,115,128,0.2)_1px,transparent_1px),linear-gradient(to_bottom,rgba(92,115,128,0.2)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:linear-gradient(to_right,transparent_4%,rgba(0,0,0,0.2)_36%,rgba(0,0,0,0.88)_68%,black_100%)]"
+            />
+            <div className="relative z-10 w-full md:w-[50%] md:pr-10">
                <h3 className="mb-2 font-display text-[22px] font-bold tracking-tight text-[#222f36]">복잡한 절차 없이 간편하게</h3>
                <p className="text-readable font-body text-[14.5px] font-medium leading-[1.65] text-[#6b828e]">
                  PC와 모바일 언제 어디서든 접속하여 실시간 빈자리를 확인하고, 가장 편리한 일정을 직접 선택하세요.
                </p>
             </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3 md:mt-0 md:w-[50%] md:justify-end">
+            <div className="relative z-10 mt-6 flex flex-wrap items-center gap-3 md:mt-0 md:w-[50%] md:justify-end">
               {['초등 1~6학년'].map((grade) => (
                  <span key={grade} className="flex h-[36px] items-center justify-center rounded-full bg-[#dee5e8] px-4 font-display text-[13px] font-bold tracking-wide text-[#5c7380] hover:bg-[#d5dde1] transition-colors cursor-default">
                    {grade}

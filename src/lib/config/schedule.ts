@@ -26,9 +26,3 @@ export const SUPPORTED_INTERVALS = [10, 20, 30] as const;
 export const GRADE_OPTIONS = [1, 2, 3, 4, 5, 6] as const;
 
 export const CLASSROOM_OPTIONS = [1, 2, 3, 4, 5] as const;
-
-export const DEFAULT_TEACHER_SEEDS = [
-  { grade: 6, classroom: 1, teacherName: "정하늘", password: "teacher6101" },
-  { grade: 5, classroom: 2, teacherName: "김서윤", password: "teacher5202" },
-  { grade: 4, classroom: 3, teacherName: "박민준", password: "teacher4303" },
-] as const;

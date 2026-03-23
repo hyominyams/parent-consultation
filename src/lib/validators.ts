@@ -23,7 +23,7 @@ export const parentAccessSchema = z.object({
     .trim()
     .transform((value) => normalizePhone(value))
     .refine((value) => isValidKoreanPhone(value), "연락처는 한국 휴대폰 형식으로 입력해주세요."),
-  pin: z.string().trim().regex(/^\d{4}$/, "PIN은 숫자 4자리여야 합니다."),
+  pin: z.string().trim().regex(/^\d{4}$/, "비회원용 비밀번호는 숫자 4자리여야 합니다."),
   privacyConsent: checkboxSchema.optional(),
   thirdPartyConsent: checkboxSchema.optional(),
 });

@@ -8,7 +8,8 @@ import { ensureParentConsent, ensureTeacherConsent } from "@/lib/consent";
 import { setSession, clearSession } from "@/lib/auth/session";
 import { ensureClassSchedule } from "@/lib/schedule";
 import { prisma } from "@/lib/db/prisma";
-import { buildParentLoginId, buildFieldErrors, toClassroomValue } from "@/lib/utils";
+import { syncTeacherAccount } from "@/lib/teacher-accounts";
+import { buildParentLoginId, buildFieldErrors, normalizePhone, toClassroomValue } from "@/lib/utils";
 import { parentAccessSchema, teacherLoginSchema } from "@/lib/validators";
 import type { ActionState } from "@/types/action-state";
 
@@ -76,18 +77,30 @@ export async function parentAccessAction(
     redirect("/reserve");
   }
 
+  const normalizedExistingPhone = normalizePhone(existingParent.phone);
   const isMatch =
     existingParent.studentName === values.studentName &&
     existingParent.parentName === values.parentName &&
-    existingParent.phone === values.phone &&
+    normalizedExistingPhone === values.phone &&
     (await bcrypt.compare(values.pin, existingParent.pinHash));
 
   if (!isMatch) {
     return {
       status: "error",
       message:
-        "입력한 정보가 기존 정보와 일치하지 않습니다. 학생 이름, 학부모 성함, 연락처, PIN을 다시 확인해주세요.",
+        "입력한 정보가 기존 정보와 일치하지 않습니다. 학생 이름, 학부모 성함, 연락처, 비회원용 비밀번호를 다시 확인해주세요.",
     };
+  }
+
+  if (existingParent.phone !== values.phone) {
+    await prisma.parentUser.update({
+      where: {
+        id: existingParent.id,
+      },
+      data: {
+        phone: values.phone,
+      },
+    });
   }
 
   await ensureParentConsent(existingParent.id, values);
@@ -119,14 +132,15 @@ export async function teacherLoginAction(
   }
 
   const values = parsed.data;
-  const teacher = await prisma.teacherUser.findUnique({
-    where: {
-      grade_classroom: {
-        grade: values.grade,
-        classroom: values.classroom,
-      },
+  const teacher = await syncTeacherAccount(
+    {
+      grade: values.grade,
+      classroom: values.classroom,
     },
-  });
+    {
+      syncPassword: true,
+    },
+  );
 
   if (
     !teacher ||

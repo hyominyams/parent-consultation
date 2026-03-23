@@ -6,8 +6,8 @@ import { CONSENT_VERSION } from "../src/lib/config/consent";
 import {
   CONSULTATION_WEEKS,
   DEFAULT_SCHEDULE_CONFIG,
-  DEFAULT_TEACHER_SEEDS,
 } from "../src/lib/config/schedule";
+import { buildTeacherPassword, listTeacherAccountConfigs } from "../src/lib/config/teachers";
 
 const prisma = new PrismaClient();
 
@@ -77,13 +77,19 @@ function buildSlotPayload(input: {
 }
 
 async function seedTeachersAndSchedules() {
-  for (const teacherSeed of DEFAULT_TEACHER_SEEDS) {
+  for (const teacherSeed of listTeacherAccountConfigs()) {
     await prisma.teacherUser.create({
       data: {
         grade: teacherSeed.grade,
         classroom: teacherSeed.classroom,
         teacherName: teacherSeed.teacherName,
-        passwordHash: await bcrypt.hash(teacherSeed.password, 10),
+        passwordHash: await bcrypt.hash(
+          buildTeacherPassword({
+            grade: teacherSeed.grade,
+            classroom: teacherSeed.classroom,
+          }),
+          10,
+        ),
       },
     });
 

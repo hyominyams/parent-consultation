@@ -67,7 +67,7 @@ export function ParentDashboardClient({ data }: ParentDashboardClientProps) {
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[color:var(--primary-subtle)]/30 text-[color:var(--primary)] shadow-sm">
           <CalendarRange className="h-10 w-10" strokeWidth={1.5} />
         </div>
-        <h1 className="text-readable font-display text-3xl font-medium tracking-tight text-[color:var(--text-strong)] sm:text-4xl">
+        <h1 className="text-readable font-body text-3xl font-extrabold tracking-[-0.04em] text-[color:var(--text-strong)] sm:text-4xl">
           {data.parent.studentName} 학생 예약 내역
         </h1>
         <p className="text-readable max-w-lg text-balance text-[1.05rem] leading-relaxed text-[color:var(--text-soft)]">
@@ -133,13 +133,13 @@ export function ParentDashboardClient({ data }: ParentDashboardClientProps) {
           <p className="text-readable mb-5 text-sm leading-relaxed text-[color:var(--text-soft)] sm:mb-0 sm:max-w-[260px]">
             일정 변경이나 예약 취소가 필요하시면 아래 버튼을 이용해 주세요.
           </p>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <Button
               variant="soft"
               size="lg"
               disabled={pending}
               onClick={() => runReservationAction("reschedule")}
-              className="h-12 flex-1 rounded-xl bg-white sm:flex-none sm:px-6 shadow-sm ring-1 ring-inset ring-[color:var(--border)]"
+              className="h-12 w-full rounded-xl bg-white px-4 text-sm shadow-sm ring-1 ring-inset ring-[color:var(--border)] sm:w-auto sm:flex-none sm:px-6 sm:text-base"
             >
               <RefreshCcw className="mr-2 h-[18px] w-[18px]" />
               예약 변경
@@ -149,7 +149,7 @@ export function ParentDashboardClient({ data }: ParentDashboardClientProps) {
               size="lg"
               disabled={pending}
               onClick={() => runReservationAction("delete")}
-              className="h-12 flex-1 rounded-xl sm:flex-none sm:px-6 shadow-sm"
+              className="h-12 w-full rounded-xl px-4 text-sm sm:w-auto sm:flex-none sm:px-6 sm:text-base shadow-sm"
             >
               <Trash2 className="mr-2 h-[18px] w-[18px]" />
               예약 삭제

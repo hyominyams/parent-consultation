@@ -114,7 +114,7 @@ function ParentAccessForm() {
 
   return (
     <form action={formAction} className="grid gap-5">
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-3 sm:items-start">
         <div className="grid gap-2">
           <Label htmlFor="grade">학년</Label>
           <select
@@ -143,7 +143,7 @@ function ParentAccessForm() {
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
         <div className="grid gap-2">
           <Label htmlFor="studentName">학생 이름</Label>
           <Input id="studentName" name="studentName" placeholder="예: 김민수" />
@@ -156,15 +156,27 @@ function ParentAccessForm() {
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
         <div className="grid gap-2">
           <Label htmlFor="phone">연락처</Label>
-          <Input id="phone" name="phone" inputMode="tel" placeholder="01012341234" />
+          <Input id="phone" name="phone" inputMode="tel" autoComplete="tel-national" placeholder="01012345678" />
+          <p className="text-[11px] leading-relaxed text-text-muted">하이픈(`-`)을 넣어도 자동으로 제외되어 저장됩니다.</p>
           <FieldError errors={state.fieldErrors} name="phone" />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="pin">포털 PIN 4자리</Label>
-          <Input id="pin" name="pin" inputMode="numeric" maxLength={4} placeholder="1234" />
+          <Label htmlFor="pin">비회원용 비밀번호</Label>
+          <Input
+            id="pin"
+            name="pin"
+            type="password"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            placeholder="1234"
+          />
+          <p className="text-[13px] leading-relaxed text-text-muted">
+            예약 확인을 위해 암호를 기억하세요.
+          </p>
           <FieldError errors={state.fieldErrors} name="pin" />
         </div>
       </div>
@@ -210,7 +222,7 @@ function TeacherLoginForm() {
 
   return (
     <form action={formAction} className="grid gap-5">
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
         <div className="grid gap-2">
           <Label htmlFor="teacher-grade">학년</Label>
           <select
@@ -234,7 +246,7 @@ function TeacherLoginForm() {
         </div>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2 sm:items-start">
         <div className="grid gap-2">
           <Label htmlFor="teacherName">교사 이름</Label>
           <Input id="teacherName" name="teacherName" placeholder="예: 정하늘" />
@@ -252,7 +264,7 @@ function TeacherLoginForm() {
       <Card className="bg-primary-container/40 p-5 shadow-none border border-primary/20">
         <p className="text-sm font-bold text-on-primary-container">교사 계정 안내</p>
         <p className="text-readable mt-2 text-sm leading-relaxed text-on-primary-container/80">
-          교사 계정은 시드 데이터로 준비되어 있으며, 학급에 할당된 교사만 교사용 대시보드에 접근할 수 있습니다.
+          교사 계정은 학년·반별로 미리 준비되어 있으며, 담임 성함이 등록된 학급만 로그인할 수 있습니다.
         </p>
       </Card>
 
@@ -276,7 +288,8 @@ export function AuthExperience({ initialRole = "PARENT" }: AuthExperienceProps) 
           School Portal
         </Badge>
         <h1 className="font-display text-4xl font-extrabold tracking-tight text-text-strong sm:text-5xl md:text-6xl">
-          2026학년도 <span className="text-primary italic">학부모 상담 신청</span>
+          <span className="block sm:inline">2026학년도</span>
+          <span className="mt-2 block whitespace-nowrap text-primary sm:ml-3 sm:mt-0 sm:inline">학부모 상담신청</span>
         </h1>
         <p className="text-readable mx-auto mt-6 max-w-2xl font-body text-lg font-medium leading-relaxed text-text-soft">
           학생 정보로 로그인해 원하는 상담 시간을 편리하게 예약하세요. 별도의 회원가입 없이 안전하게
@@ -289,7 +302,7 @@ export function AuthExperience({ initialRole = "PARENT" }: AuthExperienceProps) 
         <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary-container/30 opacity-40 blur-3xl" />
         <div className="relative z-10 flex flex-col gap-10">
           <div className="flex w-full justify-center">
-            <div className="inline-flex rounded-full bg-surface-container-low p-1.5 border border-surface-container-high">
+            <div className="inline-flex w-full max-w-[18rem] rounded-full border border-surface-container-high bg-surface-container-low p-1.5">
               {[
                 { value: "PARENT", label: "학부모", icon: CheckCircle2 },
                 { value: "TEACHER", label: "교사", icon: GraduationCap },
@@ -302,14 +315,14 @@ export function AuthExperience({ initialRole = "PARENT" }: AuthExperienceProps) 
                     type="button"
                     onClick={() => setRole(item.value as "PARENT" | "TEACHER")}
                     className={cn(
-                      "inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold transition-all",
+                      "inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-3.5 text-[13px] font-bold transition-all sm:px-8 sm:text-sm",
                       role === item.value
                         ? "bg-white text-primary shadow-lg shadow-primary/10 border border-primary/10"
                         : "text-text-soft hover:text-text-strong",
                     )}
                   >
                     <Icon className={cn("h-4 w-4", role === item.value ? "text-primary" : "text-text-muted")} />
-                    {item.label}
+                    <span className="whitespace-nowrap">{item.label}</span>
                   </button>
                 );
               })}

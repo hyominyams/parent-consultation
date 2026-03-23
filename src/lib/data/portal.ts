@@ -3,8 +3,10 @@ import { eachDayOfInterval, format } from "date-fns";
 import { ko } from "date-fns/locale";
 
 import { CONSULTATION_WEEKS } from "@/lib/config/schedule";
+import { getTeacherDisplayName } from "@/lib/config/teachers";
 import { prisma } from "@/lib/db/prisma";
 import { ensureClassSchedule } from "@/lib/schedule";
+import { syncTeacherAccount } from "@/lib/teacher-accounts";
 import { formatGradeClassroom, formatPhoneNumber, maskStudentName, parseTimeLabel, toClassroomValue } from "@/lib/utils";
 
 type SlotWithReservation = Awaited<ReturnType<typeof getRawSlots>>[number];
@@ -151,13 +153,9 @@ export async function getParentCalendarData(parentUserId: string) {
   await ensureClassSchedule(parent.grade, classroom);
 
   const [teacher, slots] = await Promise.all([
-    prisma.teacherUser.findUnique({
-      where: {
-        grade_classroom: {
-          grade: parent.grade,
-          classroom,
-        },
-      },
+    syncTeacherAccount({
+      grade: parent.grade,
+      classroom,
     }),
     getRawSlots(parent.grade, classroom),
   ]);
@@ -174,7 +172,7 @@ export async function getParentCalendarData(parentUserId: string) {
     },
     teacher: teacher
       ? {
-          name: teacher.teacherName,
+          name: getTeacherDisplayName(teacher.teacherName),
         }
       : null,
     hasReservation: Boolean(parent.reservation),
@@ -207,13 +205,9 @@ export async function getParentDashboardData(parentUserId: string) {
 
   const classroom = toClassroomValue(parent.classroom);
 
-  const teacher = await prisma.teacherUser.findUnique({
-    where: {
-      grade_classroom: {
-        grade: parent.grade,
-        classroom,
-      },
-    },
+  const teacher = await syncTeacherAccount({
+    grade: parent.grade,
+    classroom,
   });
 
   return {
@@ -224,7 +218,7 @@ export async function getParentDashboardData(parentUserId: string) {
       phone: formatPhoneNumber(parent.phone),
       classLabel: formatGradeClassroom(parent.grade, classroom),
     },
-    teacher: teacher?.teacherName ?? "배정 예정",
+    teacher: getTeacherDisplayName(teacher?.teacherName),
     reservation: parent.reservation
       ? {
           id: parent.reservation.id,
@@ -245,6 +239,12 @@ export async function getTeacherDashboardData(teacherUserId: string) {
   if (!teacher) {
     return null;
   }
+
+  const syncedTeacher =
+    (await syncTeacherAccount({
+      grade: teacher.grade,
+      classroom: teacher.classroom,
+    })) ?? teacher;
 
   await ensureClassSchedule(teacher.grade, teacher.classroom);
 
@@ -274,11 +274,11 @@ export async function getTeacherDashboardData(teacherUserId: string) {
 
   return {
     teacher: {
-      id: teacher.id,
-      name: teacher.teacherName,
-      grade: teacher.grade,
-      classroom: teacher.classroom,
-      classLabel: formatGradeClassroom(teacher.grade, teacher.classroom),
+      id: syncedTeacher.id,
+      name: getTeacherDisplayName(syncedTeacher.teacherName),
+      grade: syncedTeacher.grade,
+      classroom: syncedTeacher.classroom,
+      classLabel: formatGradeClassroom(syncedTeacher.grade, syncedTeacher.classroom),
     },
     weeks: buildWeekCalendar(slots, "teacher"),
     summary: buildDailySummary(slots),

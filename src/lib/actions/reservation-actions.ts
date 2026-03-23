@@ -1,13 +1,13 @@
 "use server";
 
-import { Prisma, SlotStatus } from "@prisma/client";
+import { ConsultationType, Prisma, SlotStatus } from "@prisma/client";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { revalidatePath } from "next/cache";
 
 import { requireParentSession } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db/prisma";
-import { getReservationBlockReason } from "@/lib/reservations";
+import { BLOCKED_SLOT_MESSAGE, TAKEN_SLOT_MESSAGE, getReservationBlockReason } from "@/lib/reservations";
 import { reservationActionSchema } from "@/lib/validators";
 import { toClassroomValue } from "@/lib/utils";
 import type { ActionState } from "@/types/action-state";
@@ -22,12 +22,13 @@ function reservationErrorState(code: string): ActionState {
     case "BLOCKED":
       return {
         status: "error",
-        message: "해당 시간은 신청할 수 없습니다.",
+        message: BLOCKED_SLOT_MESSAGE,
       };
     case "TAKEN":
+    case "DUPLICATE_DATE":
       return {
         status: "error",
-        message: "방금 다른 사용자가 먼저 신청했습니다. 다른 시간을 선택해주세요.",
+        message: TAKEN_SLOT_MESSAGE,
       };
     default:
       return {
@@ -35,6 +36,36 @@ function reservationErrorState(code: string): ActionState {
         message: "예약 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
       };
   }
+}
+
+function getReservationPersistenceErrorCode(error: unknown): string | null {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return null;
+  }
+
+  if (error.code === "P2034") {
+    return "TAKEN";
+  }
+
+  if (error.code !== "P2002") {
+    return null;
+  }
+
+  const target = Array.isArray(error.meta?.target)
+    ? error.meta.target
+    : typeof error.meta?.target === "string"
+      ? [error.meta.target]
+      : [];
+
+  if (target.includes("parentUserId")) {
+    return "ALREADY_RESERVED";
+  }
+
+  if (target.includes("slotId")) {
+    return "DUPLICATE_DATE";
+  }
+
+  return "TAKEN";
 }
 
 export async function bookReservationAction(
@@ -91,11 +122,28 @@ export async function bookReservationAction(
           throw new Error(blockReason);
         }
 
+        const overlappingReservation = await tx.reservation.findFirst({
+          where: {
+            slot: {
+              grade: slot.grade,
+              classroom: slot.classroom,
+              startDateTime: slot.startDateTime,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        if (overlappingReservation) {
+          throw new Error("DUPLICATE_DATE");
+        }
+
         const reservation = await tx.reservation.create({
           data: {
             parentUserId: parent.id,
             slotId: slot.id,
-            consultationType: parsed.data.consultationType as any,
+            consultationType: parsed.data.consultationType as ConsultationType,
           },
         });
 
@@ -133,6 +181,12 @@ export async function bookReservationAction(
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
   } catch (error) {
+    const persistenceErrorCode = getReservationPersistenceErrorCode(error);
+
+    if (persistenceErrorCode) {
+      return reservationErrorState(persistenceErrorCode);
+    }
+
     if (error instanceof Error) {
       return reservationErrorState(error.message);
     }
