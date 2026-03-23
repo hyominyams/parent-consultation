@@ -235,7 +235,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-0.5">일시</p>
                 <p className="text-readable text-sm font-bold italic leading-relaxed text-text-strong">
-                  {selectedSlot ? selectedSlot.fullLabel : "상담 시간을 선택해 주세요"}
+                  {selectedSlot ? selectedSlot.fullLabel : "시간을 먼저 선택하세요"}
                 </p>
               </div>
             </div>
