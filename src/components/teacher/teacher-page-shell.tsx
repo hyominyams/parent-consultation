@@ -96,7 +96,7 @@ export function TeacherPageShell({
                       className={cn(
                         "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                         active
-                          ? "bg-[color:var(--primary)] text-white shadow-sm"
+                          ? "bg-[color:var(--primary)] !text-white shadow-sm [&_svg]:!text-white"
                           : "bg-white text-[color:var(--text-soft)] ring-1 ring-inset ring-[color:var(--surface-container-high)] hover:text-[color:var(--text-strong)]",
                       )}
                     >

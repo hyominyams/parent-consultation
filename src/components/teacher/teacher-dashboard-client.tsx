@@ -144,7 +144,7 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild className="rounded-xl px-5 text-base">
+              <Button asChild className="rounded-xl px-5 text-base !text-white [&_svg]:!text-white">
                 <Link href="/teacher/availability">
                   <CalendarRange className="h-[18px] w-[18px]" />
                   일정 관리

@@ -173,7 +173,7 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                   selectedWeekKey === week.weekKey
-                    ? "bg-[color:var(--primary)] text-white"
+                    ? "bg-[color:var(--primary)] !text-white"
                     : "bg-[color:var(--surface-container-low)] text-[color:var(--text-soft)] hover:text-[color:var(--text-strong)]",
                 )}
               >
