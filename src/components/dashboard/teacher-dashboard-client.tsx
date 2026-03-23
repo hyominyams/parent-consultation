@@ -117,9 +117,9 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
             <br />
             상담 관리
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-9 text-[color:var(--text-soft)]">
-            교사 계정은 본인 학급의 상담 일정만 관리할 수 있습니다. 예약 현황 확인, 슬롯 차단,
-            주차별 시간표 재구성이 한 화면에서 가능합니다.
+          <p className="text-readable mt-5 max-w-2xl text-lg leading-relaxed text-[color:var(--text-soft)]">
+            교사 계정에서는 본인 학급의 상담 일정만 관리할 수 있습니다. 예약 현황 확인, 슬롯 차단,
+            주차별 시간표 재구성을 한 화면에서 처리할 수 있습니다.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Badge variant="booked">교사 {data.teacher.name}</Badge>
@@ -342,13 +342,13 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
                   ) : null}
                 </div>
               ) : (
-                <p className="mt-5 text-[color:var(--text-soft)]">좌측에서 슬롯을 선택해주세요.</p>
+                <p className="text-readable mt-5 text-[color:var(--text-soft)]">캘린더에서 슬롯을 선택해 주세요.</p>
               )}
             </Card>
 
             <Card className="bg-[color:var(--surface-0)]">
               <p className="font-semibold text-[color:var(--text-strong)]">교사 권한 안내</p>
-              <p className="mt-3 text-sm leading-8 text-[color:var(--text-soft)]">
+              <p className="text-readable mt-3 text-sm leading-relaxed text-[color:var(--text-soft)]">
                 교사 계정은 본인 학급 슬롯만 조회하고 수정할 수 있습니다. 학부모 계정은 이 화면에 접근할 수 없습니다.
               </p>
             </Card>
@@ -412,7 +412,7 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
                     <input name="endTime" type="time" defaultValue={config.endTime} className="h-12 rounded-2xl bg-[color:var(--surface-1)] px-4 outline-none" />
                   </label>
                 </div>
-                <p className="text-sm leading-7 text-[color:var(--text-soft)]">
+                <p className="text-readable text-sm leading-relaxed text-[color:var(--text-soft)]">
                   이미 예약이 존재하는 주차는 시간 간격과 운영 시간을 다시 생성할 수 없습니다.
                 </p>
                 <div className="flex justify-end">
@@ -449,7 +449,7 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
                     </div>
                     <div>
                       <p className="text-lg font-semibold text-[color:var(--text-strong)]">{notification.title}</p>
-                      <p className="mt-2 text-sm leading-7 text-[color:var(--text-soft)]">{notification.message}</p>
+                      <p className="text-readable mt-2 text-sm leading-relaxed text-[color:var(--text-soft)]">{notification.message}</p>
                       <p className="mt-2 text-xs uppercase tracking-[0.14em] text-[color:var(--text-muted)]">{formatFullDate(new Date(notification.createdAt))}</p>
                     </div>
                   </div>

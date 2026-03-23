@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { deleteReservationAction } from "@/lib/actions/reservation-actions";
 import type { ParentDashboardData } from "@/lib/data/portal";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatFullDate, parseTimeLabel } from "@/lib/utils";
 
@@ -68,11 +67,11 @@ export function ParentDashboardClient({ data }: ParentDashboardClientProps) {
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[color:var(--primary-subtle)]/30 text-[color:var(--primary)] shadow-sm">
           <CalendarRange className="h-10 w-10" strokeWidth={1.5} />
         </div>
-        <h1 className="font-display text-3xl font-medium tracking-tight text-[color:var(--text-strong)] sm:text-4xl">
+        <h1 className="text-readable font-display text-3xl font-medium tracking-tight text-[color:var(--text-strong)] sm:text-4xl">
           {data.parent.studentName} 학생 예약 내역
         </h1>
-        <p className="max-w-md text-balance text-[1.05rem] leading-relaxed text-[color:var(--text-soft)]">
-          상담 예약이 성공적으로 완료되었습니다. 아래의 예약 일정을 확인해 주세요.
+        <p className="text-readable max-w-lg text-balance text-[1.05rem] leading-relaxed text-[color:var(--text-soft)]">
+          상담 예약이 완료되었습니다. 아래에서 예약 일정을 확인해 주세요.
         </p>
       </div>
 
@@ -131,8 +130,8 @@ export function ParentDashboardClient({ data }: ParentDashboardClientProps) {
         </div>
 
         <div className="flex flex-col border-t border-black/5 bg-slate-50/50 p-6 sm:flex-row sm:items-center sm:justify-between sm:px-12">
-          <p className="mb-5 text-sm leading-relaxed text-[color:var(--text-soft)] sm:mb-0 sm:max-w-[220px]">
-            일정 변경이나 취소가 필요하신 경우 버튼을 이용해 주세요.
+          <p className="text-readable mb-5 text-sm leading-relaxed text-[color:var(--text-soft)] sm:mb-0 sm:max-w-[260px]">
+            일정 변경이나 예약 취소가 필요하시면 아래 버튼을 이용해 주세요.
           </p>
           <div className="flex items-center gap-3">
             <Button

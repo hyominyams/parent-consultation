@@ -17,8 +17,8 @@ export function EmptyState({ title, description, href, cta }: EmptyStateProps) {
         <div className="rounded-full bg-[color:var(--secondary-container)] px-4 py-2 text-sm font-medium text-[color:var(--secondary-foreground)]">
           아직 비어 있어요
         </div>
-        <h3 className="font-display text-3xl text-[color:var(--text-strong)]">{title}</h3>
-        <p className="text-base leading-8 text-[color:var(--text-muted)]">{description}</p>
+        <h3 className="text-readable font-display text-3xl text-[color:var(--text-strong)]">{title}</h3>
+        <p className="text-readable text-base leading-relaxed text-[color:var(--text-muted)]">{description}</p>
         {href && cta ? (
           <Button asChild style={{ color: '#ffffff' }}>
             <Link href={href} style={{ color: '#ffffff' }}>{cta}</Link>

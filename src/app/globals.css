@@ -100,6 +100,8 @@ body {
   font-family: var(--font-body);
   letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 a {
@@ -129,4 +131,10 @@ textarea {
 
 .text-balance {
   text-wrap: balance;
+}
+
+.text-readable {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }

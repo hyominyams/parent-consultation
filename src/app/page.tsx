@@ -41,9 +41,9 @@ export default function HomePage() {
         </h1>
 
         {/* Subtitle */}
-        <p className="mx-auto mb-10 mt-2 max-w-[34rem] text-center font-body text-[17px] font-medium leading-[1.7] text-[#566e7a]">
-          선생님과의 진솔한 대화로 아이의 더 나은 내일을 만들어갑니다.<br className="hidden sm:block" />
-          원하시는 상담 일정을 온라인으로 손쉽게 확정하세요.
+        <p className="text-readable mx-auto mb-10 mt-2 max-w-[34rem] text-center font-body text-[17px] font-medium leading-[1.7] text-[#566e7a]">
+          선생님과의 진솔한 대화로 아이의 더 나은 내일을 만들어갑니다. 원하시는 상담 일정을 온라인으로
+          손쉽게 확정하세요.
         </p>
 
         {/* Buttons */}
@@ -56,7 +56,7 @@ export default function HomePage() {
           </Button>
           <Button asChild variant="soft" size="lg" className="h-[52px] rounded-full border border-gray-200 bg-white px-8 text-[15.5px] font-bold text-[color:var(--primary)] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-md">
             <Link href="/dashboard">
-              신청 내역 조회
+              예약 내역 조회
             </Link>
           </Button>
         </div>
@@ -73,7 +73,7 @@ export default function HomePage() {
                  <h3 className="mb-4 font-display text-[22px] font-bold text-[#222f36] tracking-tight">
                    소중한 우리 아이의 올바른 성장을 위한 첫 상담
                  </h3>
-                 <p className="font-body text-[14.5px] font-medium leading-[1.7] text-[#6b828e] break-keep">
+                 <p className="text-readable font-body text-[14.5px] font-medium leading-[1.7] text-[#6b828e]">
                    선생님과의 첫 대화를 통해 아이의 학업 성취와 정서적 건강을 함께 고민하고, 올바른 성장을 지원하는 소중하고 유의미한 시간을 가져보세요.
                  </p>
                </div>
@@ -99,7 +99,7 @@ export default function HomePage() {
             </div>
             <div>
                <h3 className="mb-3 font-display text-[22px] font-bold tracking-tight text-[#FFFFFF]">강력한 정보 보호</h3>
-               <p className="font-body text-[14.5px] font-medium leading-[1.7] text-[#a0c7d4] break-keep">
+               <p className="text-readable font-body text-[14.5px] font-medium leading-[1.7] text-[#a0c7d4]">
                  입력하신 연락처 및 예약 내역은 최고 수준의 보안으로 유지되며, 상담이 종료된 직후 모두 폐기됩니다.
                </p>
             </div>
@@ -110,7 +110,7 @@ export default function HomePage() {
             <div>
               <h2 className="mb-1 font-display text-[44px] font-extrabold tracking-tight text-[#1a3845] md:text-[50px]">20분</h2>
               <h3 className="mb-2.5 font-display text-[17px] font-bold text-[#1e4554]">밀도 있는 집중 상담</h3>
-              <p className="font-body text-[14.5px] font-medium leading-[1.65] text-[#4d7f91] break-keep">
+              <p className="text-readable font-body text-[14.5px] font-medium leading-[1.65] text-[#4d7f91]">
                 가장 핵심적인 학업 이야기를 나누고 구체적인 계획을 수립할 수 있도록 최적화된 시간을 제공합니다.
               </p>
             </div>
@@ -120,7 +120,7 @@ export default function HomePage() {
           <div className="col-span-1 flex flex-col justify-between rounded-[2rem] bg-[#f5f7f9] p-8 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.04)] md:col-span-2 md:flex-row md:items-center">
             <div className="w-full md:w-[50%] md:pr-10">
                <h3 className="mb-2 font-display text-[22px] font-bold tracking-tight text-[#222f36]">복잡한 절차 없이 간편하게</h3>
-               <p className="font-body text-[14.5px] font-medium leading-[1.65] text-[#6b828e] break-keep">
+               <p className="text-readable font-body text-[14.5px] font-medium leading-[1.65] text-[#6b828e]">
                  PC와 모바일 언제 어디서든 접속하여 실시간 빈자리를 확인하고, 가장 편리한 일정을 직접 선택하세요.
                </p>
             </div>

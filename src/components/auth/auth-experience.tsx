@@ -1,13 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useActionState, useEffect, useState } from "react";
 import {
   CheckCircle2,
   GraduationCap,
-  KeyRound,
-  NotebookPen,
-  School2,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -26,13 +22,6 @@ import { cn } from "@/lib/utils";
 
 type AuthExperienceProps = {
   initialRole?: "PARENT" | "TEACHER";
-};
-
-const authImages = {
-  classroom:
-    "https://images.unsplash.com/photo-1766476210492-824c8a4b79b2?auto=format&fit=crop&fm=jpg&q=80&w=1400",
-  notes:
-    "https://images.unsplash.com/photo-1769794371055-54436b54577e?auto=format&fit=crop&fm=jpg&q=80&w=1200",
 };
 
 function FieldError({
@@ -58,7 +47,7 @@ function ConsentChecklist() {
         <ShieldCheck className="h-4 w-4 text-primary" />
         개인정보의 안전한 보호 및 이용 안내
       </div>
-      <p className="mt-3 text-[11px] leading-relaxed text-text-soft tracking-tight">
+      <p className="text-readable mt-3 text-[11px] leading-relaxed text-text-soft tracking-tight">
         최초 1회 정보 입력을 통해 계정이 자동 생성됩니다. 입력하신 정보는 본인 확인 및 상담 관리를 위해서만 활용되며, <span className="font-bold text-text-strong">상담 기간 종료 시 모든 데이터는 즉시 영구 파기됩니다.</span>
       </p>
 
@@ -73,13 +62,13 @@ function ConsentChecklist() {
             <strong className="text-sm font-bold text-text-strong">
               {CONSENT_COPY.privacy.title} (필수)
             </strong>
-            <div className="text-[11px] leading-relaxed text-text-muted">
-              관리 주체: {CONSENT_COPY.privacy.organization} <br />
-              수집 항목: {CONSENT_COPY.privacy.items} <br />
-              이용 목적: {CONSENT_COPY.privacy.purpose} <br />
-              <span className="font-bold text-primary">
+            <div className="text-readable grid gap-0.5 text-[11px] leading-relaxed text-text-muted">
+              <p>관리 주체: {CONSENT_COPY.privacy.organization}</p>
+              <p>수집 항목: {CONSENT_COPY.privacy.items}</p>
+              <p>이용 목적: {CONSENT_COPY.privacy.purpose}</p>
+              <p className="font-bold text-primary">
                 보관 기간: {CONSENT_COPY.privacy.retention}
-              </span>
+              </p>
             </div>
           </div>
         </label>
@@ -94,10 +83,10 @@ function ConsentChecklist() {
             <strong className="text-sm font-bold text-[color:var(--text-strong)]">
               {CONSENT_COPY.thirdParty.title} (필수)
             </strong>
-            <div className="text-[11px] leading-relaxed text-[color:var(--text-muted)]">
-              제공 기관: {CONSENT_COPY.thirdParty.organization} <br />
-              이용 목적: {CONSENT_COPY.thirdParty.purpose} <br />
-              보관 기간: {CONSENT_COPY.thirdParty.retention}
+            <div className="text-readable grid gap-0.5 text-[11px] leading-relaxed text-[color:var(--text-muted)]">
+              <p>제공 기관: {CONSENT_COPY.thirdParty.organization}</p>
+              <p>이용 목적: {CONSENT_COPY.thirdParty.purpose}</p>
+              <p>보관 기간: {CONSENT_COPY.thirdParty.retention}</p>
             </div>
           </div>
         </label>
@@ -194,7 +183,7 @@ function ParentAccessForm() {
       </Button>
 
       {state.meta?.loginId ? (
-        <div className="rounded-[1.5rem] bg-[color:var(--secondary-container)] px-5 py-4 text-sm text-[color:var(--secondary-foreground)]">
+        <div className="text-readable rounded-[1.5rem] bg-[color:var(--secondary-container)] px-5 py-4 text-sm text-[color:var(--secondary-foreground)]">
           현재 연결된 로그인 ID: <strong>{state.meta.loginId}</strong>
         </div>
       ) : null}
@@ -262,7 +251,7 @@ function TeacherLoginForm() {
 
       <Card className="bg-primary-container/40 p-5 shadow-none border border-primary/20">
         <p className="text-sm font-bold text-on-primary-container">교사 계정 안내</p>
-        <p className="mt-2 text-sm leading-relaxed text-on-primary-container/80">
+        <p className="text-readable mt-2 text-sm leading-relaxed text-on-primary-container/80">
           교사 계정은 시드 데이터로 준비되어 있으며, 학급에 할당된 교사만 교사용 대시보드에 접근할 수 있습니다.
         </p>
       </Card>
@@ -289,8 +278,9 @@ export function AuthExperience({ initialRole = "PARENT" }: AuthExperienceProps) 
         <h1 className="font-display text-4xl font-extrabold tracking-tight text-text-strong sm:text-5xl md:text-6xl">
           2026학년도 <span className="text-primary italic">학부모 상담 신청</span>
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl font-body text-lg font-medium leading-relaxed text-text-soft">
-          학생 정보로 로그인하여 편리하게 상담 시간을 예약하세요.<br className="hidden sm:block" /> 별도의 회원가입 없이 안전하게 이용하실 수 있습니다.
+        <p className="text-readable mx-auto mt-6 max-w-2xl font-body text-lg font-medium leading-relaxed text-text-soft">
+          학생 정보로 로그인해 원하는 상담 시간을 편리하게 예약하세요. 별도의 회원가입 없이 안전하게
+          이용하실 수 있습니다.
         </p>
       </div>
 
@@ -332,7 +322,7 @@ export function AuthExperience({ initialRole = "PARENT" }: AuthExperienceProps) 
                   <div className="flex items-start gap-4">
                     <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-[color:var(--primary)]" />
                     <div>
-                      <p className="font-display font-medium text-[color:var(--text-strong)]">
+                      <p className="text-readable font-display font-medium text-[color:var(--text-strong)]">
                         정확한 학생 및 학부모 정보를 입력해주세요.
                       </p>
                     </div>
