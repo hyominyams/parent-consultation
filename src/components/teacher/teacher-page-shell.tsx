@@ -36,7 +36,7 @@ export function TeacherPageShell({
 }: TeacherPageShellProps) {
   return (
     <main className="min-h-screen">
-      <SiteHeader currentPath={currentPath} />
+      <SiteHeader currentPath={currentPath} teacherUnreadCount={unreadCount} />
       <section className="mx-auto w-full max-w-[1180px] px-5 py-8 sm:px-8">
         <div className="grid gap-5">
           <header className="overflow-hidden rounded-[2rem] border border-black/5 bg-white shadow-[0_20px_60px_rgba(30,57,75,0.08)]">

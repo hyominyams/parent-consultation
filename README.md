@@ -80,11 +80,17 @@ npm run db:seed
 
 Set the same environment variables from `.env.example` in the Vercel project settings.
 
+Important for Supabase + Prisma on Vercel:
+
+- `DATABASE_URL` should use the Supabase transaction pooler / Supavisor connection string.
+- `DIRECT_URL` should use the direct database connection string for Prisma CLI workflows.
+
 Important notes:
 
 - `postinstall` runs `prisma generate` automatically during install.
 - Production database changes should be applied with Supabase migrations before or during deployment.
 - Seed data is not part of Vercel build. Run `npm run db:seed` manually only when you want sample data in the remote database.
+- If Vercel shows intermittent server errors or the app feels slow, check that `DATABASE_URL` is not pointing at the direct `db.<project-ref>.supabase.co:5432` host.
 
 ## Sample Teacher Accounts
 

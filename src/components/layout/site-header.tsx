@@ -9,20 +9,22 @@ import { prisma } from "@/lib/db/prisma";
 
 type SiteHeaderProps = {
   currentPath?: string;
+  teacherUnreadCount?: number;
 };
 
-export async function SiteHeader({ currentPath }: SiteHeaderProps) {
+export async function SiteHeader({ currentPath, teacherUnreadCount }: SiteHeaderProps) {
   const session = await getSession();
   const homeHref = session?.userType === "TEACHER" ? "/teacher/dashboard" : "/";
 
   const unreadCount =
     session?.userType === "TEACHER"
-      ? await prisma.teacherNotification.count({
+      ? (teacherUnreadCount ??
+        (await prisma.teacherNotification.count({
           where: {
             teacherUserId: session.userId,
             isRead: false,
           },
-        })
+        })))
       : 0;
 
   const links =
