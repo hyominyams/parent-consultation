@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Public+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#bdcbf8",
+              "surface-container-highest": "#dce4e8",
+              "on-error-container": "#6e0a12",
+              "surface-container-low": "#f0f4f7",
+              "primary-dim": "#115a74",
+              "on-secondary": "#f2faff",
+              "surface-container-high": "#e3e9ed",
+              "on-secondary-fixed-variant": "#346173",
+              "on-secondary-container": "#2a5769",
+              "on-primary": "#f3faff",
+              "error": "#a83836",
+              "surface-dim": "#d4dbdf",
+              "inverse-primary": "#a3dfff",
+              "primary-fixed-dim": "#95d1f0",
+              "surface-tint": "#246681",
+              "on-tertiary-fixed-variant": "#3e4c71",
+              "secondary-fixed-dim": "#aedbf0",
+              "primary-fixed": "#a3dfff",
+              "surface-variant": "#dce4e8",
+              "surface-container": "#eaeff2",
+              "tertiary-container": "#bdcbf8",
+              "outline": "#747c80",
+              "tertiary-fixed-dim": "#b0bde9",
+              "error-dim": "#67040d",
+              "error-container": "#fa746f",
+              "on-background": "#2c3437",
+              "surface": "#f7f9fb",
+              "on-tertiary-container": "#354368",
+              "on-surface-variant": "#596064",
+              "primary": "#246681",
+              "surface-bright": "#f7f9fb",
+              "on-error": "#fff7f6",
+              "on-primary-container": "#00516b",
+              "on-primary-fixed-variant": "#135b76",
+              "inverse-on-surface": "#9a9d9f",
+              "primary-container": "#a3dfff",
+              "secondary-container": "#bce9ff",
+              "secondary-dim": "#2b596a",
+              "tertiary-dim": "#455278",
+              "surface-container-lowest": "#ffffff",
+              "on-surface": "#2c3437",
+              "secondary": "#386577",
+              "tertiary": "#515e85",
+              "outline-variant": "#acb3b7",
+              "on-primary-fixed": "#003d52",
+              "background": "#f7f9fb",
+              "on-tertiary": "#f9f8ff",
+              "on-secondary-fixed": "#134556",
+              "on-tertiary-fixed": "#212f53",
+              "secondary-fixed": "#bce9ff",
+              "inverse-surface": "#0b0f10"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Public Sans"],
+              "label": ["Public Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-extrabold text-sky-900 dark:text-white tracking-tighter">
+                St. Jude Academic Portal
+            </div>
+<nav class="hidden md:flex items-center space-x-8">
+<a class="text-sky-900 dark:text-sky-400 border-b-2 border-sky-800 pb-1 font-bold" href="#">Dashboard</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-700 transition-colors" href="#">Schedule</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-700 transition-colors" href="#">Teachers</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-sky-700 transition-colors" href="#">Support</a>
+</nav>
+<div class="flex items-center space-x-4">
+<button class="text-slate-500 hover:bg-slate-50 p-2 rounded-lg transition-all">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border-2 border-primary/10">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Close up professional headshot of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4pQtKUtwSx66jvoP1soOdqTqkQx0r2wjhrgCRW4t5U8DawyKG-cIxF9qQLBRi8MSh5SyXzekFxZjNUaCv4iKc2FmNXmRBkLvhhx4GxgBXwi6j5kHUWqEjI1TL28DmD2tLOXfToqQYzdV_ZQT2CEGyKux2rHlrIB5ApNHEh8EqgJ93Z0P2XAW5hJIcJjVs0xP6y0I8daWN_Px0_iLJYz_LjNqsQuNjhB7R8iCQac5QpK2vbiQ6rNYbbgtz4JR-asqmCVIi4PpxVaoT"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-28 pb-20 px-6 max-w-7xl mx-auto">
+<!-- Dashboard Header -->
+<div class="mb-12 ml-0 md:ml-24">
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Welcome back, James</h1>
+<p class="text-on-surface-variant font-medium">Manage your consultation appointments and academic progress.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Main Content Area: Active Bookings -->
+<div class="lg:col-span-8 space-y-8">
+<section>
+<div class="flex justify-between items-end mb-6">
+<h2 class="text-2xl font-bold text-on-surface">Current Bookings</h2>
+<span class="text-sm font-semibold text-primary px-4 py-1 bg-primary-container rounded-full">2 Upcoming</span>
+</div>
+<!-- Booking Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-8 transition-all hover:scale-[1.01] duration-300 relative overflow-hidden group mb-6">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+<div class="flex gap-6">
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden shrink-0">
+<img alt="Teacher" class="w-full h-full object-cover" data-alt="Professional female educator smiling in office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAh6j-GQAGJyX1Fv_JsCU3oX3aLpXXpe6hWotT579K6PbJKaxOLlB4eMoFx7-Y50x3NeDKMFZuo6oyiO55JIOWdUmDZxHuE5aRFBxUY1hOMoOfzyZxUl9dBzT9CIhq2VjF9E3CjPxRXsnge5u6QvKoC2i5M3fNlNrlItPj6TvwTlqaNCvgRXndM6MuOPTiv6ZOMaccuCLfN3SM1WxWz3jTCM7gBOBswlghML_TSgiA3btTWuyWt-F22GCygx7ckCsc-6-uSYMlKrYCa"/>
+</div>
+<div>
+<h3 class="text-xl font-bold text-on-surface">Dr. Sarah Jenkins</h3>
+<p class="text-on-surface-variant font-medium mb-2">Advanced Mathematics</p>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center gap-1.5 text-xs font-semibold text-secondary-dim bg-secondary-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            October 24, 2026
+                                        </div>
+<div class="flex items-center gap-1.5 text-xs font-semibold text-primary-dim bg-primary-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                            02:30 PM - 03:00 PM
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex md:flex-col gap-2 shrink-0">
+<button class="flex-1 bg-primary text-on-primary font-bold px-6 py-2.5 rounded-full text-sm hover:bg-primary-dim transition-colors">
+                                    View Details
+                                </button>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface-container-highest text-on-surface-variant font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-surface-container-high transition-colors">
+                                        Edit
+                                    </button>
+<button class="bg-error/10 text-error p-2.5 rounded-xl hover:bg-error-container hover:text-on-error-container transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Booking Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-8 transition-all hover:scale-[1.01] duration-300 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+<div class="flex gap-6">
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden shrink-0">
+<img alt="Teacher" class="w-full h-full object-cover" data-alt="Friendly male teacher in classroom environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpDDCZBwTxPae7PQc6eEFmb_5_j98oOjdNolWScgdQgxLkUeDXye2nvz6GE_-gD2nOif6wCdY_D03FGK81ckVTmDpofh2yXkjuuWOWDKiumcIIn-n_SzE04FUraMKrey6ME3kQ2mshFDg7F3lUQV6IQiICPVzhxbK9g9XpFVF__sdcJyjUfpxGwXeOXbzehTwciUsfIO1gcsTRGNXDigG_HNyYdxUVkufsknrrwWrcxwv43JoZcZUAYcByByExfxQehFrzcY93ILxt"/>
+</div>
+<div>
+<h3 class="text-xl font-bold text-on-surface">Mr. Robert Chen</h3>
+<p class="text-on-surface-variant font-medium mb-2">History &amp; Humanities</p>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center gap-1.5 text-xs font-semibold text-secondary-dim bg-secondary-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                                            October 28, 2026
+                                        </div>
+<div class="flex items-center gap-1.5 text-xs font-semibold text-primary-dim bg-primary-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                            10:00 AM - 10:30 AM
+                                        </div>
+</div>
+</div>
+</div>
+<div class="flex md:flex-col gap-2 shrink-0">
+<button class="flex-1 bg-primary text-on-primary font-bold px-6 py-2.5 rounded-full text-sm hover:bg-primary-dim transition-colors">
+                                    View Details
+                                </button>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface-container-highest text-on-surface-variant font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-surface-container-high transition-colors">
+                                        Edit
+                                    </button>
+<button class="bg-error/10 text-error p-2.5 rounded-xl hover:bg-error-container hover:text-on-error-container transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- History Preview -->
+<section class="mt-12">
+<h2 class="text-lg font-bold text-on-surface mb-4">Recent History</h2>
+<div class="bg-surface-container-low rounded-xl overflow-hidden">
+<div class="p-4 border-b border-white/40 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">check_circle</span>
+<div>
+<p class="text-sm font-bold">Physics Consultation</p>
+<p class="text-xs text-on-surface-variant">Prof. Alan Turing • Oct 15</p>
+</div>
+</div>
+<button class="text-primary text-xs font-bold hover:underline">Download Notes</button>
+</div>
+<div class="p-4 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">check_circle</span>
+<div>
+<p class="text-sm font-bold">English Literature Review</p>
+<p class="text-xs text-on-surface-variant">Ms. Maya Angelou • Oct 12</p>
+</div>
+</div>
+<button class="text-primary text-xs font-bold hover:underline">Download Notes</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar -->
+<div class="lg:col-span-4 space-y-6">
+<!-- Branding Card -->
+<div class="bg-primary-dim text-on-primary p-8 rounded-2xl relative overflow-hidden shadow-xl">
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined !text-9xl" style="font-variation-settings: 'FILL' 1;">school</span>
+</div>
+<h3 class="text-2xl font-extrabold mb-2">St. Jude Academy</h3>
+<p class="text-sm text-primary-fixed opacity-90 leading-relaxed mb-6">Empowering academic excellence through personalized faculty guidance.</p>
+<button class="w-full bg-surface-container-lowest text-primary-dim font-bold py-3 rounded-full hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add</span>
+                        New Appointment
+                    </button>
+</div>
+<!-- Status Card -->
+<div class="bg-surface-container-high p-6 rounded-2xl">
+<h4 class="text-sm font-bold text-on-surface uppercase tracking-widest mb-4">Academic Status</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-sm font-medium text-on-surface-variant">Attendance Rate</span>
+<span class="text-sm font-bold text-on-surface">98%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 98%"></div>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="text-sm font-medium text-on-surface-variant">GPA (Projected)</span>
+<span class="text-sm font-bold text-on-surface">3.82</span>
+</div>
+</div>
+</div>
+<!-- Notifications -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl">
+<h4 class="text-sm font-bold text-on-surface mb-4">Portal Notifications</h4>
+<div class="space-y-4">
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-error mt-1.5 shrink-0"></div>
+<p class="text-xs font-medium text-on-surface-variant leading-relaxed">
+<span class="font-bold text-on-surface">Reminder:</span> Mid-term feedback forms for Science are now available.
+                            </p>
+</div>
+<div class="flex gap-3">
+<div class="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0"></div>
+<p class="text-xs font-medium text-on-surface-variant leading-relaxed">
+<span class="font-bold text-on-surface">Update:</span> Library hours extended for examination week.
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-50 dark:bg-slate-950 w-full py-12 mt-12 tonal-shift-bg-only">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 w-full max-w-7xl mx-auto gap-8">
+<div class="text-center md:text-left">
+<div class="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">St. Jude Memorial Academy</div>
+<p class="text-xs font-medium Public Sans tracking-wide text-slate-500 dark:text-slate-400">© 2026 St. Jude Memorial Academy. All rights reserved.</p>
+</div>
+<nav class="flex flex-wrap justify-center gap-6">
+<a class="text-xs font-medium Public Sans tracking-wide text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 underline transition-all" href="#">Privacy Policy</a>
+<a class="text-xs font-medium Public Sans tracking-wide text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 underline transition-all" href="#">Terms of Service</a>
+<a class="text-xs font-medium Public Sans tracking-wide text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 underline transition-all" href="#">School Calendar</a>
+<a class="text-xs font-medium Public Sans tracking-wide text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-300 underline transition-all" href="#">Contact Office</a>
+</nav>
+</div>
+</footer>
+<!-- Reservation Successful Modal -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+<!-- Modal Card -->
+<div class="relative bg-surface-container-lowest rounded-2xl shadow-2xl max-w-md w-full p-8 text-center transform transition-all animate-in fade-in zoom-in duration-300">
+<div class="mb-6">
+<div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+<span class="material-symbols-outlined text-green-600 !text-5xl font-bold">check</span>
+</div>
+</div>
+<h2 class="text-2xl font-extrabold text-on-surface mb-4">예약 완료!</h2>
+<p class="text-on-surface-variant font-medium leading-relaxed mb-8">
+      2026년 4월 1일 13:20 상담 예약이 성공적으로 완료되었습니다.
+    </p>
+<button class="w-full bg-primary text-on-primary font-bold py-3.5 rounded-full hover:bg-primary-dim transition-all active:scale-95 shadow-lg shadow-primary/20" onclick="this.closest('.fixed').remove()">
+      확인
+    </button>
+</div>
+</div></body></html>

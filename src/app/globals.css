@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+:root {
+  /* Premium Neutral Base for "Stitch" vibe */
+  --background: #FCFAF8;
+  /* Soft Parchment */
+  --foreground: #2D3133;
+
+  /* Surface System for Layering */
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F7F5F2;
+  --surface-container: #F1EFEA;
+  --surface-container-high: #E8E5E0;
+  --surface-container-highest: #DCD9D4;
+
+  --surface: #FCFAF8;
+
+  /* Designer Palette (Deep Sea Focus) */
+  --primary: #1A5F7A;
+  /* Deep Blue */
+  --primary-dim: #134B62;
+  --primary-foreground: #FFFFFF;
+  --primary-container: #E8F0F4;
+  --on-primary-container: #0A2B3A;
+  --on-primary: #FFFFFF;
+
+  /* Soft Accent (Dusty Lavender/Sky) */
+  --secondary: #B1B5C1;
+  /* Dusty Slate Blue */
+  --secondary-container: #EDEFF4;
+  --secondary-foreground: #4A5161;
+  --on-secondary-container: #2F3542;
+  --on-secondary: #FFFFFF;
+
+  /* Typography Tokens */
+  --text-strong: #1A1D1F;
+  --text-soft: #5E666B;
+  --text-muted: #9BA3A8;
+  --outline-variant: #E8EBEB;
+
+  --on-surface: #1A1D1F;
+  --on-surface-variant: #5E666B;
+
+  --ring: #1A5F7A4D;
+  /* 30% transparency */
+}
+
+@theme inline {
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-dim: var(--primary-dim);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-on-primary: var(--on-primary);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-on-secondary: var(--on-secondary);
+
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+
+  --color-text-strong: var(--text-strong);
+  --color-text-soft: var(--text-soft);
+  --color-text-muted: var(--text-muted);
+
+  --font-display: "Pretendard Variable", "Pretendard", "Inter", "Apple SD Gothic Neo", sans-serif;
+  --font-body: "Pretendard Variable", "Pretendard", "Manrope", "Apple SD Gothic Neo", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-feature-settings: "cv05", "cv08", "cv11";
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-logo {
+  font-family: var(--font-logo), serif;
+}
+
+.text-balance {
+  text-wrap: balance;
+}

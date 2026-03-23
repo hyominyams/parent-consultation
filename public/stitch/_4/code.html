@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>St. Jude Academic Portal - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Public+Sans:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-fixed": "#bdcbf8",
+                        "surface-container-highest": "#dce4e8",
+                        "on-error-container": "#6e0a12",
+                        "surface-container-low": "#f0f4f7",
+                        "primary-dim": "#115a74",
+                        "on-secondary": "#f2faff",
+                        "surface-container-high": "#e3e9ed",
+                        "on-secondary-fixed-variant": "#346173",
+                        "on-secondary-container": "#2a5769",
+                        "on-primary": "#f3faff",
+                        "error": "#a83836",
+                        "surface-dim": "#d4dbdf",
+                        "inverse-primary": "#a3dfff",
+                        "primary-fixed-dim": "#95d1f0",
+                        "surface-tint": "#246681",
+                        "on-tertiary-fixed-variant": "#3e4c71",
+                        "secondary-fixed-dim": "#aedbf0",
+                        "primary-fixed": "#a3dfff",
+                        "surface-variant": "#dce4e8",
+                        "surface-container": "#eaeff2",
+                        "tertiary-container": "#bdcbf8",
+                        "outline": "#747c80",
+                        "tertiary-fixed-dim": "#b0bde9",
+                        "error-dim": "#67040d",
+                        "error-container": "#fa746f",
+                        "on-background": "#2c3437",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-container": "#354368",
+                        "on-surface-variant": "#596064",
+                        "primary": "#246681",
+                        "surface-bright": "#f7f9fb",
+                        "on-error": "#fff7f6",
+                        "on-primary-container": "#00516b",
+                        "on-primary-fixed-variant": "#135b76",
+                        "inverse-on-surface": "#9a9d9f",
+                        "primary-container": "#a3dfff",
+                        "secondary-container": "#bce9ff",
+                        "secondary-dim": "#2b596a",
+                        "tertiary-dim": "#455278",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#2c3437",
+                        "secondary": "#386577",
+                        "tertiary": "#515e85",
+                        "outline-variant": "#acb3b7",
+                        "on-primary-fixed": "#003d52",
+                        "background": "#f7f9fb",
+                        "on-tertiary": "#f9f8ff",
+                        "on-secondary-fixed": "#134556",
+                        "on-tertiary-fixed": "#212f53",
+                        "secondary-fixed": "#bce9ff",
+                        "inverse-surface": "#0b0f10"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Public Sans', sans-serif;
+            background-color: #f7f9fb;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+        .editorial-shadow {
+            box-shadow: 0 20px 40px -15px rgba(36, 102, 129, 0.08);
+        }
+        /* Custom ghost border for inputs per design system */
+        .input-ghost-border {
+            border: none;
+            border-bottom: 2px solid rgba(172, 179, 183, 0.2);
+            background-color: transparent;
+            transition: border-color 0.2s ease;
+        }
+        .input-ghost-border:focus {
+            outline: none;
+            border-bottom-color: #246681;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar (Suppressed navigation for transactional onboarding) -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-extrabold text-sky-900 tracking-tighter">
+                St. Jude Academic Portal
+            </div>
+<div class="hidden md:flex gap-6 items-center">
+<span class="text-sm font-medium text-slate-500">Need help?</span>
+<button class="text-sky-800 font-bold hover:bg-slate-50 px-4 py-2 rounded-lg transition-all">Support</button>
+</div>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center pt-24 pb-12 px-6">
+<div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<!-- Left Side: Editorial Content -->
+<div class="lg:col-span-5 space-y-8 lg:mt-12">
+<div>
+<span class="inline-block px-4 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold tracking-widest uppercase mb-4">Registration</span>
+<h1 class="text-5xl font-extrabold text-on-surface tracking-tight leading-tight">
+                        Begin Your <br/><span class="text-primary">Academic Journey.</span>
+</h1>
+<p class="mt-6 text-lg text-on-surface-variant leading-relaxed font-medium">
+                        Welcome to the St. Jude parent portal. Set up your account to manage schedules, track progress, and coordinate with teachers seamlessly.
+                    </p>
+</div>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Smart ID Generation</h3>
+<p class="text-sm text-on-surface-variant">IDs are automatically generated based on your grade and roll number.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+</div>
+<div>
+<h3 class="font-bold text-on-surface">Secure Access</h3>
+<p class="text-sm text-on-surface-variant">Your 4-digit pin ensures quick and secure access to sensitive data.</p>
+</div>
+</div>
+</div>
+<!-- Abstract Decorative Element -->
+<div class="relative h-48 w-full rounded-3xl overflow-hidden bg-primary-dim">
+<img alt="Students collaborating" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay" data-alt="Modern classroom environment with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFkoadIqmy-ZbSoCgbcnA3euRTlYpzWgWFVOWrmxfPcfBfdY7LXBTQ2DvVbz9Sio3ZD3WdIOBrjyD6w-XM6J-olio8e3nnH4-CMjZ1GaBOSipgKVSFKa_lvEaj_7umqDHYxgeEsclNeKYcVavSk1QXyHpLKqrW9AS1Z9CqGu2diN8I9QN8eKDThBVkKApzOWZcbPy1mj1u3mkeXTigpFzEw7D1Z8rzOHA64TBsprb1dX-yXfAZ6XoFPtU2RvgPghk1yMCJSEZr0JIF"/>
+<div class="absolute inset-0 bg-gradient-to-tr from-primary-dim to-transparent p-8 flex flex-col justify-end">
+<p class="text-white font-medium italic">"Education is the most powerful weapon which you can use to change the world."</p>
+</div>
+</div>
+</div>
+<!-- Right Side: The Form Card -->
+<div class="lg:col-span-7">
+<div class="bg-surface-container-lowest rounded-[2rem] p-10 editorial-shadow">
+<form class="space-y-10">
+<!-- Section 1: Student Info -->
+<section>
+<div class="flex items-center gap-3 mb-8">
+<div class="w-1.5 h-6 bg-primary rounded-full"></div>
+<h2 class="text-xl font-bold tracking-tight text-on-surface">Student Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Student Name</label>
+<input class="w-full py-3 input-ghost-border font-medium text-on-surface" placeholder="e.g. Julian Manning" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Roll No</label>
+<input class="w-full py-3 input-ghost-border font-medium text-on-surface" placeholder="01" type="number"/>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Grade</label>
+<select class="w-full py-3 input-ghost-border font-medium text-on-surface appearance-none bg-transparent">
+<option>Select Grade</option>
+<option value="6">Grade 6</option>
+<option value="7">Grade 7</option>
+<option value="8">Grade 8</option>
+</select>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Class</label>
+<select class="w-full py-3 input-ghost-border font-medium text-on-surface appearance-none bg-transparent">
+<option>Select Section</option>
+<option value="1">Section 1</option>
+<option value="2">Section 2</option>
+<option value="3">Section 3</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Section 2: Parent Info -->
+<section>
+<div class="flex items-center gap-3 mb-8">
+<div class="w-1.5 h-6 bg-secondary rounded-full"></div>
+<h2 class="text-xl font-bold tracking-tight text-on-surface">Guardian Details</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Parent Name</label>
+<input class="w-full py-3 input-ghost-border font-medium text-on-surface" placeholder="e.g. Sarah Manning" type="text"/>
+</div>
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Contact Number</label>
+<input class="w-full py-3 input-ghost-border font-medium text-on-surface" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+</section>
+<!-- Section 3: Security -->
+<section class="bg-surface-container-low rounded-2xl p-6">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="max-w-xs">
+<h2 class="text-lg font-bold text-on-surface">Create Portal PIN</h2>
+<p class="text-sm text-on-surface-variant mt-1">Choose a 4-digit number to secure your academic records.</p>
+</div>
+<div class="flex gap-2">
+<input class="w-12 h-14 bg-white rounded-xl text-center font-bold text-xl border-none shadow-sm focus:ring-2 focus:ring-primary" maxlength="1" type="password"/>
+<input class="w-12 h-14 bg-white rounded-xl text-center font-bold text-xl border-none shadow-sm focus:ring-2 focus:ring-primary" maxlength="1" type="password"/>
+<input class="w-12 h-14 bg-white rounded-xl text-center font-bold text-xl border-none shadow-sm focus:ring-2 focus:ring-primary" maxlength="1" type="password"/>
+<input class="w-12 h-14 bg-white rounded-xl text-center font-bold text-xl border-none shadow-sm focus:ring-2 focus:ring-primary" maxlength="1" type="password"/>
+</div>
+</div>
+</section>
+<!-- Action Bar -->
+<div class="pt-4 flex flex-col md:flex-row items-center gap-6">
+<button class="w-full md:w-auto px-10 py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-full font-bold text-lg shadow-lg transition-all active:scale-95" type="submit">
+                                Log In / Register
+                            </button>
+<p class="text-sm text-on-surface-variant font-medium text-center md:text-left">
+                                By continuing, you agree to the <a class="text-primary underline" href="#">School Privacy Policy</a> and terms of use.
+                            </p>
+</div>
+</form>
+</div>
+<!-- ID Logic Hint -->
+<div class="mt-6 flex items-center justify-center gap-2 text-xs font-medium text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-sm" data-icon="info">info</span>
+<span>System Note: Student ID will be generated as (Grade)(Class)(Roll). Example: 6101</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-50 border-t-0 py-12">
+<div class="flex flex-col md:flex-row justify-between items-center px-12 w-full max-w-7xl mx-auto">
+<div class="mb-6 md:mb-0">
+<div class="text-lg font-bold text-slate-900 mb-2">St. Jude Memorial Academy</div>
+<div class="text-xs font-medium text-slate-500 tracking-wide">© 2026 St. Jude Memorial Academy. All rights reserved.</div>
+</div>
+<div class="flex gap-8">
+<a class="text-xs font-medium text-slate-500 hover:text-sky-600 underline transition-all" href="#">Privacy Policy</a>
+<a class="text-xs font-medium text-slate-500 hover:text-sky-600 underline transition-all" href="#">Terms of Service</a>
+<a class="text-xs font-medium text-slate-500 hover:text-sky-600 underline transition-all" href="#">School Calendar</a>
+<a class="text-xs font-medium text-slate-500 hover:text-sky-600 underline transition-all" href="#">Contact Office</a>
+</div>
+</div>
+</footer>
+</body></html>
