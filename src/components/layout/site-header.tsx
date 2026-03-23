@@ -13,6 +13,7 @@ type SiteHeaderProps = {
 
 export async function SiteHeader({ currentPath }: SiteHeaderProps) {
   const session = await getSession();
+  const homeHref = session?.userType === "TEACHER" ? "/teacher/dashboard" : "/";
 
   const unreadCount =
     session?.userType === "TEACHER"
@@ -39,7 +40,7 @@ export async function SiteHeader({ currentPath }: SiteHeaderProps) {
         {/* Left Section: Logo */}
         <div className="flex flex-1 justify-start">
           <Link
-            href="/"
+            href={homeHref}
             className="group flex flex-col justify-center leading-none"
           >
             <span className="font-logo text-[1.4rem] font-bold italic tracking-tight text-[color:var(--primary)] transition-colors group-hover:text-[color:var(--text-strong)] sm:text-[1.6rem]">

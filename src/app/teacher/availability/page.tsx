@@ -17,7 +17,7 @@ export default async function TeacherAvailabilityPage() {
     <TeacherPageShell
       currentPath="/teacher/availability"
       title="날짜 조정"
-      description="불가능 날짜를 날짜 단위로 빠르게 닫고 다시 열 수 있게 정리했습니다. 이미 예약된 시간은 보존한 채 남은 시간만 함께 조정됩니다."
+      description="날짜별 상담 가능 상태 조정"
       teacherName={data.teacher.name}
       classLabel={data.teacher.classLabel}
       unreadCount={data.unreadCount}

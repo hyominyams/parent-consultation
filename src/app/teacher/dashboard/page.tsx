@@ -17,7 +17,7 @@ export default async function TeacherDashboardPage() {
     <TeacherPageShell
       currentPath="/teacher/dashboard"
       title="교사 대시보드"
-      description="알림과 핵심 운영 지표만 먼저 확인할 수 있도록 구성했습니다. 세부 조정은 상담 설정과 날짜 조정 페이지에서 이어서 처리하면 됩니다."
+      description="요약 확인과 관리 화면 이동"
       teacherName={data.teacher.name}
       classLabel={data.teacher.classLabel}
       unreadCount={data.unreadCount}

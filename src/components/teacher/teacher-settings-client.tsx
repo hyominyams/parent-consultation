@@ -57,12 +57,9 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
 
   return (
     <div className="grid gap-4">
-      <Card className="border border-black/5 bg-white p-6 shadow-[0_18px_48px_rgba(30,57,75,0.06)] sm:p-7">
-        <h2 className="text-xl font-semibold tracking-[-0.03em] text-[color:var(--text-strong)]">운영 시간 설정</h2>
-        <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
-          각 주차의 시간 간격과 시작, 종료 시각을 조정합니다. 이미 예약이 들어간 주차는 슬롯을 다시
-          만들 수 없으므로 입력창이 잠깁니다.
-        </p>
+      <Card className="border border-[color:var(--primary)]/20 bg-gradient-to-br from-[color:var(--primary)] via-[color:var(--primary)] to-[color:var(--primary-dim)] p-6 text-white shadow-[0_18px_48px_rgba(30,57,75,0.14)] sm:p-7">
+        <h2 className="text-xl font-semibold tracking-[-0.03em] text-white">주차별 시간 설정</h2>
+        <p className="mt-2 text-sm leading-6 text-white/78">간격, 시작, 종료 시간</p>
       </Card>
 
       {data.configs.map((config) => {
@@ -96,14 +93,12 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
                       {config.weekLabel}
                     </h3>
                     {locked ? (
-                      <Badge variant="blocked">예약 존재로 잠금</Badge>
+                      <Badge variant="blocked">잠김</Badge>
                     ) : (
-                      <Badge variant="muted">수정 가능</Badge>
+                      <Badge variant="muted">편집 가능</Badge>
                     )}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
-                    {week?.description ?? "해당 주차의 운영 시간과 슬롯 간격을 설정합니다."}
-                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">{week?.description ?? "-"}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-2 text-sm">
@@ -146,9 +141,7 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
 
               <div className="flex flex-col gap-3 border-t border-[color:var(--surface-container-high)] pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-6 text-[color:var(--text-soft)]">
-                  {locked
-                    ? "이 주차에는 이미 예약이 있어 시간 설정을 다시 만들 수 없습니다."
-                    : "저장하면 선택한 주차의 슬롯 구성이 새 운영 시간 기준으로 다시 생성됩니다."}
+                  {locked ? "예약 존재" : "저장 시 슬롯 재생성"}
                 </p>
 
                 <Button

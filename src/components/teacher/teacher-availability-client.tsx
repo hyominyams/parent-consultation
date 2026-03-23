@@ -74,16 +74,11 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
 
   return (
     <div className="grid gap-4">
-      <Card className="border border-black/5 bg-white p-6 shadow-[0_18px_48px_rgba(30,57,75,0.06)] sm:p-7">
+      <Card className="border border-[color:var(--primary)]/20 bg-gradient-to-br from-[color:var(--primary)] via-[color:var(--primary)] to-[color:var(--primary-dim)] p-6 text-white shadow-[0_18px_48px_rgba(30,57,75,0.14)] sm:p-7">
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="text-xl font-semibold tracking-[-0.03em] text-[color:var(--text-strong)]">
-              날짜 단위 조정
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
-              하루 전체를 불가능 날짜로 닫거나, 닫혀 있던 날짜를 다시 열 수 있습니다. 이미 예약된 시간은
-              그대로 유지되고 남은 시간만 함께 조정됩니다.
-            </p>
+            <h2 className="text-xl font-semibold tracking-[-0.03em] text-white">날짜별 상태 조정</h2>
+            <p className="mt-2 text-sm leading-6 text-white/78">불가 날짜 지정 / 다시 열기</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -95,8 +90,8 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                 className={cn(
                   "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                   selectedWeekKey === week.weekKey
-                    ? "bg-[color:var(--primary)] text-white"
-                    : "bg-[color:var(--surface-container-low)] text-[color:var(--text-soft)] hover:bg-[color:var(--surface-container)] hover:text-[color:var(--text-strong)]",
+                    ? "bg-white text-[color:var(--primary)]"
+                    : "bg-white/10 text-white hover:bg-white/18",
                 )}
               >
                 {week.label}
@@ -106,13 +101,13 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
 
           {selectedWeek ? (
             <div className="flex flex-wrap gap-2 text-sm">
-              <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
+              <span className="rounded-full bg-white/12 px-3 py-2 text-white">
                 기간 {selectedWeek.description}
               </span>
-              <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
+              <span className="rounded-full bg-white/12 px-3 py-2 text-white">
                 전체 날짜 {selectedDays.length}일
               </span>
-              <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
+              <span className="rounded-full bg-white/12 px-3 py-2 text-white">
                 완전히 닫힘 {fullyBlockedDates}일
               </span>
             </div>
@@ -175,14 +170,14 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                     <p className="mt-3 text-sm leading-6 text-[color:var(--text-soft)]">
                       {stats.bookedTimes.length > 0
                         ? `예약된 시간: ${stats.bookedTimes.join(", ")}`
-                        : "예약된 시간은 없습니다."}
+                        : "예약 없음"}
                     </p>
                     <p className="mt-1 text-sm leading-6 text-[color:var(--text-soft)]">
                       {onlyBooked
-                        ? "이미 예약된 시간만 남아 있어 날짜 단위로 추가 조정할 수 없습니다."
+                        ? "예약만 남아 변경 불가"
                         : shouldOpen
-                          ? "닫힌 시간을 다시 열어 학부모가 선택할 수 있게 합니다."
-                          : "현재 열려 있는 시간을 한 번에 닫아 불가능 날짜로 관리할 수 있습니다."}
+                          ? "닫힌 시간 다시 열기"
+                          : "남은 시간 전체 닫기"}
                     </p>
                   </div>
 

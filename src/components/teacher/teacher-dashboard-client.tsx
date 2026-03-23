@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Bell, CheckCheck } from "lucide-react";
+import { Bell, CalendarClock, CheckCheck, Settings2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -19,20 +20,32 @@ type TeacherDashboardClientProps = {
   data: TeacherDashboardData;
 };
 
-function MetricCard({
+const ROUTE_CARDS = [
+  {
+    href: "/teacher/settings",
+    title: "상담 설정",
+    summary: "시간 간격 / 시작 / 종료",
+    icon: Settings2,
+  },
+  {
+    href: "/teacher/availability",
+    title: "날짜 조정",
+    summary: "불가 날짜 / 다시 열기",
+    icon: CalendarClock,
+  },
+] as const;
+
+function SummaryTile({
   label,
   value,
-  description,
 }: {
   label: string;
   value: string;
-  description: string;
 }) {
   return (
-    <div className="rounded-[1.35rem] border border-[color:var(--surface-container-high)] bg-white p-5">
-      <p className="text-sm font-medium text-[color:var(--text-muted)]">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[color:var(--text-strong)]">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">{description}</p>
+    <div className="rounded-[1.35rem] bg-white/12 px-4 py-4 text-white">
+      <p className="text-sm text-white/72">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{value}</p>
     </div>
   );
 }
@@ -54,6 +67,8 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
       blocked: 0,
     },
   );
+
+  const latestNotifications = data.notifications.slice(0, 3);
 
   function announce(message?: string, isError?: boolean) {
     if (!message) {
@@ -98,36 +113,51 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
 
   return (
     <div className="grid gap-4">
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          label="읽지 않은 알림"
-          value={`${data.unreadCount}건`}
-          description="새 신청이나 변경 요청을 우선 확인할 수 있습니다."
-        />
-        <MetricCard
-          label="확정 예약"
-          value={`${totals.booked}건`}
-          description="현재까지 예약된 상담 수입니다."
-        />
-        <MetricCard
-          label="신청 가능 슬롯"
-          value={`${totals.open}개`}
-          description="학부모가 지금 선택할 수 있는 시간입니다."
-        />
-        <MetricCard
-          label="닫아 둔 슬롯"
-          value={`${totals.blocked}개`}
-          description="교사 화면에서 직접 막아 둔 시간입니다."
-        />
+      <Card className="overflow-hidden border border-[color:var(--primary)]/20 bg-gradient-to-br from-[color:var(--primary)] via-[color:var(--primary)] to-[color:var(--primary-dim)] p-6 text-white shadow-[0_18px_48px_rgba(30,57,75,0.14)] sm:p-7">
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-sm font-semibold text-white/74">운영 요약</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-white">오늘 확인할 항목</h2>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <SummaryTile label="새 알림" value={`${data.unreadCount}건`} />
+            <SummaryTile label="예약" value={`${totals.booked}건`} />
+            <SummaryTile label="열림" value={`${totals.open}개`} />
+          </div>
+        </div>
+      </Card>
+
+      <section className="grid gap-3 md:grid-cols-2">
+        {ROUTE_CARDS.map((route) => {
+          const Icon = route.icon;
+
+          return (
+            <Link
+              key={route.href}
+              href={route.href}
+              className="rounded-[1.5rem] bg-gradient-to-br from-[color:var(--primary)] to-[color:var(--primary-dim)] p-6 text-white shadow-[0_18px_42px_rgba(30,57,75,0.14)] transition-transform hover:-translate-y-0.5"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-white/74">바로 이동</p>
+                  <h3 className="mt-2 text-xl font-semibold tracking-[-0.03em]">{route.title}</h3>
+                  <p className="mt-2 text-sm text-white/78">{route.summary}</p>
+                </div>
+                <div className="rounded-full bg-white/12 p-3">
+                  <Icon className="h-5 w-5" />
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </section>
 
       <Card className="border border-black/5 bg-white p-6 shadow-[0_18px_48px_rgba(30,57,75,0.06)] sm:p-7">
         <div className="flex flex-col gap-4 border-b border-[color:var(--surface-container-high)] pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold tracking-[-0.03em] text-[color:var(--text-strong)]">알림 내역</h2>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
-              최근 예약과 변경 알림만 먼저 모아 보여줍니다.
-            </p>
+            <h2 className="text-xl font-semibold tracking-[-0.03em] text-[color:var(--text-strong)]">최근 알림</h2>
+            <p className="mt-2 text-sm text-[color:var(--text-soft)]">최근 3건</p>
           </div>
           <Button
             type="button"
@@ -142,13 +172,11 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
           </Button>
         </div>
 
-        {data.notifications.length === 0 ? (
-          <div className="py-8 text-sm leading-6 text-[color:var(--text-soft)]">
-            확인할 새 알림이 없습니다.
-          </div>
+        {latestNotifications.length === 0 ? (
+          <div className="py-8 text-sm text-[color:var(--text-soft)]">표시할 알림이 없습니다.</div>
         ) : (
           <div className="mt-5 grid gap-3">
-            {data.notifications.map((notification) => (
+            {latestNotifications.map((notification) => (
               <div
                 key={notification.id}
                 className={cn(
@@ -187,6 +215,7 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
                       disabled={pending && pendingTarget === notification.id}
                       className="rounded-full"
                     >
+                      <Bell className="h-4 w-4" />
                       읽음 처리
                     </Button>
                   ) : null}
@@ -195,55 +224,6 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
             ))}
           </div>
         )}
-      </Card>
-
-      <Card className="border border-black/5 bg-white p-6 shadow-[0_18px_48px_rgba(30,57,75,0.06)] sm:p-7">
-        <div className="flex items-start gap-3 border-b border-[color:var(--surface-container-high)] pb-5">
-          <div className="mt-0.5 rounded-full bg-[color:var(--surface-container-low)] p-2 text-[color:var(--primary)]">
-            <Bell className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold tracking-[-0.03em] text-[color:var(--text-strong)]">날짜별 현황</h2>
-            <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
-              날짜마다 예약, 신청 가능, 닫힘 상태를 한 줄씩 확인할 수 있습니다.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-3 divide-y divide-[color:var(--surface-container-high)]">
-          {data.summary.map((item) => {
-            const statusBadge =
-              item.open === 0 && item.blocked > 0
-                ? { label: "닫힘 중심", variant: "blocked" as const }
-                : item.booked > 0
-                  ? { label: "예약 있음", variant: "booked" as const }
-                  : { label: "신청 가능", variant: "muted" as const };
-
-            return (
-              <div key={item.dateKey} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-base font-semibold text-[color:var(--text-strong)]">{item.label}</p>
-                    <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
-                  </div>
-                  <p className="mt-1 text-sm text-[color:var(--text-soft)]">총 {item.total}개 슬롯</p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 text-sm">
-                  <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    예약 {item.booked}
-                  </span>
-                  <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    가능 {item.open}
-                  </span>
-                  <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    불가 {item.blocked}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </Card>
     </div>
   );
