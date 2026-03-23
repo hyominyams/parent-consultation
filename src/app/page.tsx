@@ -1,10 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Noto_Serif_KR } from "next/font/google";
 import { ArrowRight, CalendarDays, ShieldCheck } from "lucide-react";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Button } from "@/components/ui/button";
+
+const heroTitleFont = Noto_Serif_KR({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export default function HomePage() {
   return (
@@ -28,20 +34,29 @@ export default function HomePage() {
         <div className="absolute left-1/2 top-0 -z-10 h-[500px] w-full max-w-[1000px] -translate-x-1/2 bg-[radial-gradient(circle_at_top,rgba(195,234,249,0.5)_0%,transparent_70%)] pointer-events-none" />
 
         {/* Badge */}
-        <div className="mb-10 mt-8 inline-flex items-center gap-2 rounded-full bg-[#dbebef]/80 px-4 py-2 hover:bg-[#dbebef] transition-colors md:mt-12 backdrop-blur-sm">
-          <CalendarDays className="h-[14px] w-[14px] text-[#4d7281]" />
-          <span className="font-display text-[12px] font-bold tracking-wide text-[#4d7281]">
+        <div className="mb-8 mt-8 inline-flex items-center gap-2 rounded-full bg-[#dbebef]/80 px-3.5 py-1.5 transition-colors backdrop-blur-sm hover:bg-[#dbebef] md:mt-10">
+          <CalendarDays className="h-[13px] w-[13px] text-[#4d7281]" />
+          <span className="font-body text-[11px] font-semibold tracking-[0.14em] text-[#4d7281]">
             상담 예약 기간 안내
           </span>
         </div>
 
         {/* Title */}
-        <h1 className="mb-6 text-center font-display text-[3.25rem] font-extrabold leading-[1.1] tracking-[-0.03em] text-[#222f36] sm:text-6xl md:text-7xl">
-          2026학년도 1학기<br />신월초 학부모 상담
-        </h1>
+        <div className="mb-6 flex max-w-[46rem] flex-col items-center">
+          <p className="mb-4 inline-flex items-center gap-3 font-body text-[0.78rem] font-semibold tracking-[0.18em] text-[#5b7481] sm:text-[0.82rem]">
+            <span className="h-px w-7 bg-[#9ab3be]" />
+            2026학년도 1학기
+            <span className="h-px w-7 bg-[#9ab3be]" />
+          </p>
+          <h1
+            className={`${heroTitleFont.className} text-balance text-center text-[2.45rem] font-semibold leading-[1.22] tracking-[-0.055em] text-[#223038] sm:text-[3.1rem] md:text-[3.95rem]`}
+          >
+            여수신월 <span className="whitespace-nowrap">학부모상담</span>
+          </h1>
+        </div>
 
         {/* Subtitle */}
-        <p className="text-readable mx-auto mb-10 mt-2 max-w-[34rem] text-center font-body text-[17px] font-medium leading-[1.7] text-[#566e7a]">
+        <p className="text-readable mx-auto mb-10 mt-1 max-w-[31rem] text-center font-body text-[15.5px] font-medium leading-[1.75] text-[#566e7a] sm:text-[16px]">
           선생님과의 진솔한 대화로 아이의 더 나은 내일을 만들어갑니다. 원하시는 상담 일정을 온라인으로
           손쉽게 확정하세요.
         </p>
