@@ -216,7 +216,7 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                   <p className="mt-3 text-sm text-[color:var(--text-soft)]">{day.fullLabel}</p>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="mt-4 space-y-2">
                   {day.slots.map((slot) => {
                     const slotTone = getSlotTone(slot);
                     const isBooked = slot.status === "BOOKED";
@@ -225,15 +225,16 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                       <div
                         key={slot.id}
                         className={cn(
-                          "rounded-[1.15rem] px-3 py-3 text-left",
+                          "flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-left",
                           slotTone.className,
                         )}
                       >
-                        <p className="text-sm font-semibold">{slot.startLabel}</p>
-                        <p className="mt-1 text-[11px] text-[color:var(--text-soft)]">{slot.endLabel} 종료</p>
-                        <p className="mt-2 text-[11px] font-semibold text-[color:var(--primary)]">
+                        <span className="text-sm font-semibold">
+                          {slot.startLabel} - {slot.endLabel}
+                        </span>
+                        <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--primary)]">
                           {slot.reservedStudentName ?? slotTone.label}
-                        </p>
+                        </span>
                       </div>
                     ) : (
                       <button
@@ -242,15 +243,16 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                         onClick={() => handleToggleSlot(slot.id)}
                         disabled={pending}
                         className={cn(
-                          "rounded-[1.15rem] px-3 py-3 text-left transition-all disabled:opacity-60",
+                          "flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all disabled:opacity-60",
                           slotTone.className,
                         )}
                       >
-                        <p className="text-sm font-semibold">{slot.startLabel}</p>
-                        <p className="mt-1 text-[11px] text-[color:var(--text-soft)]">{slot.endLabel} 종료</p>
-                        <p className="mt-2 text-[11px] font-semibold text-[color:var(--primary)]">
+                        <span className="text-sm font-semibold">
+                          {slot.startLabel} - {slot.endLabel}
+                        </span>
+                        <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--primary)]">
                           {pendingKey === `slot:${slot.id}` ? "처리 중..." : slotTone.label}
-                        </p>
+                        </span>
                       </button>
                     );
                   })}
