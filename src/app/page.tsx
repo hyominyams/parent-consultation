@@ -18,7 +18,7 @@ export default function HomePage() {
     <main className="flex min-h-screen flex-col bg-[#f8fafb] selection:bg-[color:var(--primary)]/20">
       <SiteHeader currentPath="/" />
 
-      <section className="relative isolate flex min-h-[50vh] w-full flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-20 sm:px-8">
+      <section className="relative isolate flex min-h-[50vh] w-full flex-col items-center justify-center overflow-hidden px-5 pb-14 pt-16 sm:px-8 sm:pb-16 sm:pt-20">
         {/* Full Wide Background Image */}
         <div className="absolute inset-0 -z-20 w-full h-full bg-[#f8fafb]">
           <Image
@@ -35,44 +35,43 @@ export default function HomePage() {
         <div className="absolute left-1/2 top-0 -z-10 h-[500px] w-full max-w-[1000px] -translate-x-1/2 bg-[radial-gradient(circle_at_top,rgba(195,234,249,0.5)_0%,transparent_70%)] pointer-events-none" />
 
         {/* Badge */}
-        <div className="mb-8 mt-8 inline-flex items-center gap-2 rounded-full bg-[#dbebef]/80 px-3.5 py-1.5 transition-colors backdrop-blur-sm hover:bg-[#dbebef] md:mt-10">
+        <div className="mb-6 mt-6 inline-flex items-center gap-2 rounded-full bg-[#dbebef]/80 px-3 py-1.5 transition-colors backdrop-blur-sm hover:bg-[#dbebef] sm:mb-8 sm:mt-8 md:mt-10">
           <CalendarDays className="h-[13px] w-[13px] text-[#4d7281]" />
-          <span className="font-body text-[11px] font-semibold tracking-[0.14em] text-[#4d7281]">
+          <span className="font-body text-[10px] font-semibold tracking-[0.12em] text-[#4d7281] sm:text-[11px] sm:tracking-[0.14em]">
             2026학년도 1학기
           </span>
         </div>
 
         {/* Title */}
-        <div className="mb-6 flex max-w-[46rem] flex-col items-center">
-          <p className="mb-4 inline-flex items-center gap-3 font-body text-[0.78rem] font-semibold tracking-[0.18em] text-[#5b7481] sm:text-[0.82rem]">
+        <div className="mb-5 flex max-w-[46rem] flex-col items-center sm:mb-6">
+          <p className="mb-4 inline-flex items-center gap-3 font-body text-[0.72rem] font-semibold tracking-[0.14em] text-[#5b7481] sm:text-[0.82rem] sm:tracking-[0.18em]">
             <span className="h-px w-7 bg-[#9ab3be]" />
             여수 신월초등학교
             <span className="h-px w-7 bg-[#9ab3be]" />
           </p>
           <h1
-            className={`${heroTitleFont.className} text-balance text-center text-[2.45rem] font-bold leading-[1.1] tracking-[-0.035em] text-[#223038] sm:text-[3.15rem] md:text-[4.05rem]`}
+            className={`${heroTitleFont.className} text-balance text-center text-[2rem] font-bold leading-[1.08] tracking-[-0.04em] text-[#223038] sm:text-[3.15rem] sm:leading-[1.1] md:text-[4.05rem]`}
           >
-            <span className="block whitespace-nowrap text-[#1f2d34]">
-              학부모상담 신청 프로그램
-            </span>
+            <span className="block text-[#1f2d34] sm:inline">학부모상담</span>
+            <span className="block text-[#1f2d34] sm:ml-3 sm:inline">신청 프로그램</span>
           </h1>
         </div>
 
         {/* Subtitle */}
-        <p className="text-readable mx-auto mb-10 mt-1 max-w-[31rem] text-center font-body text-[15.5px] font-medium leading-[1.75] text-[#566e7a] sm:text-[16px]">
+        <p className="text-readable mx-auto mb-8 mt-1 max-w-[31rem] px-2 text-center font-body text-[15px] font-medium leading-[1.72] text-[#566e7a] sm:mb-10 sm:px-0 sm:text-[16px] sm:leading-[1.75]">
           선생님과의 진솔한 대화로 아이의 더 나은 내일을 만들어갑니다. 원하시는 상담 일정을 온라인으로
           손쉽게 확정하세요.
         </p>
 
         {/* Buttons */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-          <Button asChild size="lg" style={{ color: '#ffffff' }} className="h-[52px] rounded-full bg-[color:var(--primary)] px-8 text-[15.5px] font-bold text-[#FFFFFF] transition-all shadow-md hover:-translate-y-0.5 hover:bg-[color:var(--primary-dim)] hover:shadow-lg">
+        <div className="mb-6 flex w-full max-w-sm flex-col gap-4 sm:max-w-none sm:flex-row sm:justify-center">
+          <Button asChild size="lg" style={{ color: '#ffffff' }} className="h-[52px] w-full rounded-full bg-[color:var(--primary)] px-8 text-[15.5px] font-bold text-[#FFFFFF] transition-all shadow-md hover:-translate-y-0.5 hover:bg-[color:var(--primary-dim)] hover:shadow-lg sm:w-auto">
             <Link href="/auth" style={{ color: '#ffffff' }}>
               상담 예약 시작하기
               <ArrowRight className="ml-2 h-[18px] w-[18px]" style={{ color: '#ffffff' }} />
             </Link>
           </Button>
-          <Button asChild variant="soft" size="lg" className="h-[52px] rounded-full border border-gray-200 bg-white px-8 text-[15.5px] font-bold text-[color:var(--primary)] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-md">
+          <Button asChild variant="soft" size="lg" className="h-[52px] w-full rounded-full border border-gray-200 bg-white px-8 text-[15.5px] font-bold text-[color:var(--primary)] shadow-sm transition-all hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-md sm:w-auto">
             <Link href="/dashboard">
               예약 내역 조회
             </Link>
@@ -81,11 +80,11 @@ export default function HomePage() {
       </section>
 
       {/* Grid Features Layout */}
-      <section className="relative z-10 mx-auto w-full max-w-[1040px] px-6 pb-24 md:px-8">
+      <section className="relative z-10 mx-auto w-full max-w-[1040px] px-5 pb-24 md:px-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           
           {/* Card 1: Collaborative Growth (Left, spans 2 cols) */}
-          <div className="col-span-1 flex flex-col overflow-hidden rounded-[2rem] bg-white p-8 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.06)] md:col-span-2 md:flex-row">
+          <div className="col-span-1 flex flex-col overflow-hidden rounded-[2rem] bg-white p-6 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.06)] sm:p-8 md:col-span-2 md:flex-row">
              <div className="flex w-full flex-col justify-between pb-8 pr-0 font-body md:w-[48%] md:pb-0 md:pr-10">
                <div>
                  <h3 className="mb-4 font-display text-[22px] font-bold text-[#222f36] tracking-tight">
@@ -97,8 +96,8 @@ export default function HomePage() {
                </div>
              </div>
              
-             <div className="mt-4 w-full overflow-hidden rounded-[1.25rem] md:mt-0 md:w-[52%] h-full flex flex-col">
-               <div className="relative aspect-[4/3] w-full min-h-[220px] bg-[#e8f1f5] shrink-0">
+             <div className="mt-4 flex h-full w-full flex-col overflow-hidden rounded-[1.25rem] md:mt-0 md:w-[52%]">
+               <div className="relative aspect-[4/3] w-full min-h-[200px] shrink-0 bg-[#e8f1f5] sm:min-h-[220px]">
                  <Image 
                    src="/korean_consultation_card.png" 
                    fill 
@@ -111,7 +110,7 @@ export default function HomePage() {
           </div>
 
           {/* Card 2: Secure & Private (Right, 1 col) */}
-          <div className="col-span-1 flex flex-col justify-between rounded-[2rem] bg-[color:var(--primary)] p-8 shadow-[0_8px_30px_-12px_rgba(26,95,122,0.3)] hover:bg-[color:var(--primary-dim)] transition-colors">
+          <div className="col-span-1 flex flex-col justify-between rounded-[2rem] bg-[color:var(--primary)] p-6 shadow-[0_8px_30px_-12px_rgba(26,95,122,0.3)] transition-colors hover:bg-[color:var(--primary-dim)] sm:p-8">
             <div className="mb-12 flex h-fit w-fit items-center justify-center">
                <ShieldCheck className="h-7 w-7 text-[#FFFFFF]" strokeWidth={2.5} />
             </div>
@@ -124,7 +123,7 @@ export default function HomePage() {
           </div>
 
           {/* Card 3: 15m Standard Sessions (Bottom Left, 1 col) */}
-          <div className="col-span-1 flex flex-col justify-center rounded-[2rem] bg-[#c1ebf9] p-8 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.06)] hover:bg-[#b5e6f6] transition-colors">
+          <div className="col-span-1 flex flex-col justify-center rounded-[2rem] bg-[#c1ebf9] p-6 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.06)] transition-colors hover:bg-[#b5e6f6] sm:p-8">
             <div>
               <h2 className="mb-1 font-display text-[44px] font-extrabold tracking-tight text-[#1a3845] md:text-[50px]">20분</h2>
               <h3 className="mb-2.5 font-display text-[17px] font-bold text-[#1e4554]">밀도 있는 집중 상담</h3>
@@ -135,7 +134,7 @@ export default function HomePage() {
           </div>
 
           {/* Card 4: Ready to start? (Bottom Right, 2 cols) */}
-          <div className="relative isolate col-span-1 flex flex-col justify-between overflow-hidden rounded-[2rem] bg-[#f5f7f9] p-8 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.04)] md:col-span-2 md:flex-row md:items-center">
+          <div className="relative isolate col-span-1 flex flex-col justify-between overflow-hidden rounded-[2rem] bg-[#f5f7f9] p-6 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.04)] sm:p-8 md:col-span-2 md:flex-row md:items-center">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 [background-image:linear-gradient(to_right,rgba(92,115,128,0.2)_1px,transparent_1px),linear-gradient(to_bottom,rgba(92,115,128,0.2)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:linear-gradient(to_right,transparent_4%,rgba(0,0,0,0.2)_36%,rgba(0,0,0,0.88)_68%,black_100%)]"

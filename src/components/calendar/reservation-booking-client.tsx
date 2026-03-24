@@ -869,14 +869,18 @@ function MobileFloatingConfirmBar({
         </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-surface-container-low p-4">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">담당 교사</p>
-          <p className="mt-1 text-sm font-black text-text-strong">{teacherName}</p>
+      <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-surface-container-high/60 bg-surface-container-low p-4">
+        <div className="rounded-xl bg-white/80 px-3 py-3">
+          <p className="text-[11px] font-medium tracking-[-0.01em] text-text-muted">담당 교사</p>
+          <p className="mt-1 text-[15px] font-semibold leading-snug tracking-[-0.02em] text-text-strong">
+            {teacherName}
+          </p>
         </div>
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">학급</p>
-          <p className="mt-1 text-sm font-black text-text-strong">{classLabel}</p>
+        <div className="rounded-xl bg-white/80 px-3 py-3">
+          <p className="text-[11px] font-medium tracking-[-0.01em] text-text-muted">학급</p>
+          <p className="mt-1 text-[15px] font-semibold leading-snug tracking-[-0.02em] text-text-strong">
+            {classLabel}
+          </p>
         </div>
       </div>
 
