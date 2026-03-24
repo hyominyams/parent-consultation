@@ -32,7 +32,6 @@ function getDayStats(day: DayItem) {
     blockedCount: blockedSlots.length,
     bookedCount: bookedSlots.length,
     modifiableCount: openSlots.length + blockedSlots.length,
-    bookedTimes: bookedSlots.map((slot) => `${slot.startLabel}-${slot.endLabel}`),
   };
 }
 
@@ -57,7 +56,9 @@ function getSlotTone(slot: SlotItem) {
     return {
       label: "예약됨",
       className:
-        "border border-primary/10 bg-[color:var(--primary-container)]/55 text-[color:var(--text-strong)] opacity-85",
+        "border border-primary/15 bg-primary-container/80 text-primary-dim shadow-[0_10px_24px_rgba(26,95,122,0.08)]",
+      badgeClassName: "bg-white/90 text-primary-dim ring-1 ring-primary/10",
+      timeTone: "booked" as const,
     };
   }
 
@@ -66,6 +67,8 @@ function getSlotTone(slot: SlotItem) {
       label: "닫힘",
       className:
         "border border-[color:var(--surface-container-high)] bg-[color:var(--surface-container)] text-[color:var(--text-strong)]",
+      badgeClassName: "bg-white/70 text-[color:var(--text-muted)]",
+      timeTone: "default" as const,
     };
   }
 
@@ -73,22 +76,36 @@ function getSlotTone(slot: SlotItem) {
     label: "열림",
     className:
       "border border-[color:var(--surface-container-high)] bg-[color:var(--surface-container-lowest)] text-[color:var(--text-strong)] hover:border-[color:var(--primary)]/25 hover:shadow-[0_12px_30px_rgba(30,57,75,0.08)]",
+    badgeClassName: "bg-white/70 text-[color:var(--primary)]",
+    timeTone: "default" as const,
   };
 }
 
 function SlotTimeLabel({
   startLabel,
   endLabel,
+  tone = "default",
 }: {
   startLabel: string;
   endLabel: string;
+  tone?: "default" | "booked";
 }) {
   return (
     <span className="flex flex-col leading-tight">
-      <span className="text-[0.98rem] font-semibold text-[color:var(--text-strong)]">
+      <span
+        className={cn(
+          "text-[0.98rem] font-semibold",
+          tone === "booked" ? "text-primary-dim" : "text-[color:var(--text-strong)]",
+        )}
+      >
         {startLabel}
       </span>
-      <span className="mt-0.5 text-[12px] font-medium text-[color:var(--text-muted)]">
+      <span
+        className={cn(
+          "mt-0.5 text-[12px] font-medium",
+          tone === "booked" ? "text-primary/80" : "text-[color:var(--text-muted)]",
+        )}
+      >
         종료 {endLabel}
       </span>
     </span>
@@ -213,6 +230,12 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
             const canToggle = stats.modifiableCount > 0;
             const shouldOpen = stats.openCount === 0 && stats.blockedCount > 0;
             const statusBadge = getDayStatus(stats);
+            const dayActionLabel = pendingKey === `date:${day.dateKey}`
+              ? "처리 중..."
+              : shouldOpen
+                ? "이 날짜 다시 열기"
+                : "남은 시간 전체 닫기";
+            const DayActionIcon = shouldOpen ? Unlock : Lock;
 
             return (
               <Card
@@ -247,8 +270,17 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                           slotTone.className,
                         )}
                       >
-                        <SlotTimeLabel startLabel={slot.startLabel} endLabel={slot.endLabel} />
-                        <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--primary)]">
+                        <SlotTimeLabel
+                          startLabel={slot.startLabel}
+                          endLabel={slot.endLabel}
+                          tone={slotTone.timeTone}
+                        />
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                            slotTone.badgeClassName,
+                          )}
+                        >
                           {slot.reservedStudentName ?? slotTone.label}
                         </span>
                       </div>
@@ -263,8 +295,17 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                           slotTone.className,
                         )}
                       >
-                        <SlotTimeLabel startLabel={slot.startLabel} endLabel={slot.endLabel} />
-                        <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--primary)]">
+                        <SlotTimeLabel
+                          startLabel={slot.startLabel}
+                          endLabel={slot.endLabel}
+                          tone={slotTone.timeTone}
+                        />
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                            slotTone.badgeClassName,
+                          )}
+                        >
                           {pendingKey === `slot:${slot.id}` ? "처리 중..." : slotTone.label}
                         </span>
                       </button>
@@ -272,12 +313,6 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                   })}
                 </div>
                 <div className="mt-4 border-t border-[color:var(--surface-container-high)] pt-4">
-                  <p className="text-sm leading-6 text-[color:var(--text-soft)]">
-                    {stats.bookedTimes.length > 0
-                      ? `예약된 시간: ${stats.bookedTimes.join(", ")}`
-                      : "예약된 시간이 없습니다."}
-                  </p>
-
                   {canToggle ? (
                     <Button
                       type="button"
@@ -285,17 +320,16 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                       variant={shouldOpen ? "primary" : "danger"}
                       onClick={() => handleToggleDate(day.dateKey)}
                       disabled={pending}
-                      className="mt-3 w-full rounded-xl"
+                      className="relative w-full rounded-xl text-center"
                     >
-                      {shouldOpen ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-                      {pendingKey === `date:${day.dateKey}`
-                        ? "처리 중..."
-                        : shouldOpen
-                          ? "이 날짜 다시 열기"
-                          : "남은 시간 전체 닫기"}
+                      <DayActionIcon
+                        aria-hidden="true"
+                        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
+                      />
+                      <span className="mx-auto">{dayActionLabel}</span>
                     </Button>
                   ) : (
-                    <div className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--surface-container-low)] px-3 py-3 text-sm text-[color:var(--text-soft)]">
+                    <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--surface-container-low)] px-3 py-3 text-sm text-[color:var(--text-soft)]">
                       <CalendarClock className="h-4 w-4" />
                       변경 가능한 시간이 없습니다.
                     </div>
