@@ -23,6 +23,17 @@ export async function getParentUserByLoginId(loginId: string) {
   );
 }
 
+export async function getParentUsersByIds(parentUserIds: string[]) {
+  if (parentUserIds.length === 0) {
+    return [] satisfies ParentUserRow[];
+  }
+
+  return (requireData(
+    await supabaseAdmin.from("ParentUser").select("*").in("id", parentUserIds),
+    "Failed to load parent users by IDs.",
+  ) ?? []) as ParentUserRow[];
+}
+
 export async function getTeacherUserById(teacherUserId: string) {
   return requireMaybeSingle<TeacherUserRow>(
     await supabaseAdmin.from("TeacherUser").select("*").eq("id", teacherUserId).maybeSingle(),

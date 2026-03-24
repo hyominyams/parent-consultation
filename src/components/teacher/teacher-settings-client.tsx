@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { updateTeacherWeekConfigAction } from "@/lib/actions/teacher-actions";
 import { SUPPORTED_INTERVALS } from "@/lib/config/schedule";
-import type { TeacherDashboardData } from "@/lib/data/portal";
+import type { TeacherSettingsData } from "@/lib/data/portal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type TeacherSettingsClientProps = {
-  data: TeacherDashboardData;
+  data: TeacherSettingsData;
 };
 
 export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
@@ -73,14 +73,7 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
       </Card>
 
       {data.configs.map((config) => {
-        const week = data.weeks.find((item) => item.weekKey === config.weekKey);
-        const bookedCount =
-          week?.days.reduce(
-            (acc, day) => acc + day.slots.filter((slot) => slot.status === "BOOKED").length,
-            0,
-          ) ?? 0;
-        const totalCount = week?.days.reduce((acc, day) => acc + day.slots.length, 0) ?? 0;
-        const locked = bookedCount > 0;
+        const locked = config.bookedCount > 0;
 
         return (
           <Card
@@ -109,16 +102,16 @@ export function TeacherSettingsClient({ data }: TeacherSettingsClientProps) {
                     )}
                   </div>
                   <p className="mt-2 text-sm leading-6 text-[color:var(--text-soft)]">
-                    {week?.description ?? "-"}
+                    {config.weekDescription}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2 text-sm">
                   <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    예약 {bookedCount}건
+                    예약 {config.bookedCount}건
                   </span>
                   <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    총 슬롯 {totalCount}개
+                    총 슬롯 {config.totalCount}개
                   </span>
                 </div>
               </div>

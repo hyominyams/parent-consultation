@@ -4,8 +4,10 @@ import { ko } from "date-fns/locale";
 import { CONSULTATION_WEEKS } from "@/lib/config/schedule";
 import { getTeacherDisplayName } from "@/lib/config/teachers";
 import {
+  countTeacherUnreadNotifications,
   getClassScheduleConfigs,
   getParentUserById,
+  getParentUsersByIds,
   getReservationByParentUserId,
   getReservationsBySlotIds,
   getReservationSlotById,
@@ -44,11 +46,7 @@ async function getRawSlots(grade: number, classroom: number) {
   const reservations = await getReservationsBySlotIds(slots.map((slot) => slot.id));
 
   const parentIds = Array.from(new Set(reservations.map((reservation) => reservation.parentUserId)));
-  const parents =
-    parentIds.length > 0
-      ? ((await Promise.all(parentIds.map((parentId) => getParentUserById(parentId)))).filter(Boolean) as ParentUserRow[])
-      : [];
-
+  const parents = await getParentUsersByIds(parentIds);
   const parentById = new Map(parents.map((parent) => [parent.id, parent]));
   const reservationBySlotId = new Map(
     reservations.map((reservation) => [
@@ -64,6 +62,72 @@ async function getRawSlots(grade: number, classroom: number) {
     ...slot,
     reservation: reservationBySlotId.get(slot.id) ?? null,
   })) satisfies SlotWithReservation[];
+}
+
+type SlotSummaryRow = Pick<ReservationSlotRow, "date" | "status" | "weekKey">;
+
+type TeacherPortalBaseData = {
+  teacher: {
+    id: string;
+    name: string;
+    grade: number;
+    classroom: number;
+    classLabel: string;
+  };
+  unreadCount: number;
+};
+
+type TeacherPortalContext = {
+  grade: number;
+  classroom: number;
+  teacherUserId: string;
+  base: TeacherPortalBaseData;
+};
+
+function buildTeacherPortalBaseData(
+  teacher: {
+    id: string;
+    teacherName: string;
+    grade: number;
+    classroom: number;
+  },
+  unreadCount: number,
+): TeacherPortalBaseData {
+  return {
+    teacher: {
+      id: teacher.id,
+      name: getTeacherDisplayName(teacher.teacherName),
+      grade: teacher.grade,
+      classroom: teacher.classroom,
+      classLabel: formatGradeClassroom(teacher.grade, teacher.classroom),
+    },
+    unreadCount,
+  };
+}
+
+async function getTeacherPortalContext(teacherUserId: string): Promise<TeacherPortalContext | null> {
+  const teacher = await getTeacherUserById(teacherUserId);
+
+  if (!teacher) {
+    return null;
+  }
+
+  const [syncedTeacher, unreadCount] = await Promise.all([
+    syncTeacherAccount({
+      grade: teacher.grade,
+      classroom: teacher.classroom,
+    }),
+    countTeacherUnreadNotifications(teacher.id),
+  ]);
+
+  const resolvedTeacher = syncedTeacher ?? teacher;
+
+  return {
+    grade: teacher.grade,
+    classroom: teacher.classroom,
+    teacherUserId: teacher.id,
+    base: buildTeacherPortalBaseData(resolvedTeacher, unreadCount),
+  };
 }
 
 function buildWeekCalendar(slots: SlotWithReservation[], mode: "parent" | "teacher") {
@@ -119,7 +183,7 @@ function buildWeekCalendar(slots: SlotWithReservation[], mode: "parent" | "teach
   });
 }
 
-function buildDailySummary(slots: SlotWithReservation[]) {
+function buildDailySummary(slots: SlotSummaryRow[]) {
   const summary = new Map<
     string,
     {
@@ -162,6 +226,39 @@ function buildDailySummary(slots: SlotWithReservation[]) {
       dateKey,
       ...item,
     }));
+}
+
+function buildWeekSlotSummary(slots: SlotSummaryRow[]) {
+  const summary = new Map<
+    string,
+    {
+      totalCount: number;
+      bookedCount: number;
+    }
+  >();
+
+  for (const week of CONSULTATION_WEEKS) {
+    summary.set(week.weekKey, {
+      totalCount: 0,
+      bookedCount: 0,
+    });
+  }
+
+  for (const slot of slots) {
+    const item = summary.get(slot.weekKey);
+
+    if (!item) {
+      continue;
+    }
+
+    item.totalCount += 1;
+
+    if (slot.status === "BOOKED") {
+      item.bookedCount += 1;
+    }
+  }
+
+  return summary;
 }
 
 export async function getParentCalendarData(parentUserId: string) {
@@ -248,46 +345,20 @@ export async function getParentDashboardData(parentUserId: string) {
 }
 
 export async function getTeacherDashboardData(teacherUserId: string) {
-  const teacher = await getTeacherUserById(teacherUserId);
+  const context = await getTeacherPortalContext(teacherUserId);
 
-  if (!teacher) {
+  if (!context) {
     return null;
   }
 
-  const syncedTeacher =
-    (await syncTeacherAccount({
-      grade: teacher.grade,
-      classroom: teacher.classroom,
-    })) ?? teacher;
-
-  await ensureClassSchedule(teacher.grade, teacher.classroom);
-
-  const [slots, configs, notifications] = await Promise.all([
-    getRawSlots(teacher.grade, teacher.classroom),
-    getClassScheduleConfigs(teacher.grade, teacher.classroom),
-    getTeacherNotifications(teacher.id, 12),
+  const [slots, notifications] = await Promise.all([
+    getReservationSlotsByClassroom(context.grade, context.classroom),
+    getTeacherNotifications(context.teacherUserId, 12),
   ]);
 
-  const unreadCount = notifications.filter((item) => !item.isRead).length;
-
   return {
-    teacher: {
-      id: syncedTeacher.id,
-      name: getTeacherDisplayName(syncedTeacher.teacherName),
-      grade: syncedTeacher.grade,
-      classroom: syncedTeacher.classroom,
-      classLabel: formatGradeClassroom(syncedTeacher.grade, syncedTeacher.classroom),
-    },
-    weeks: buildWeekCalendar(slots, "teacher"),
+    ...context.base,
     summary: buildDailySummary(slots),
-    configs: configs.map((config) => ({
-      id: config.id,
-      weekKey: config.weekKey,
-      slotIntervalMinutes: config.slotIntervalMinutes,
-      startTime: config.startTime,
-      endTime: config.endTime,
-      weekLabel: CONSULTATION_WEEKS.find((week) => week.weekKey === config.weekKey)?.label ?? config.weekKey,
-    })),
     notifications: notifications.map((notification) => ({
       id: notification.id,
       title: notification.title,
@@ -295,10 +366,67 @@ export async function getTeacherDashboardData(teacherUserId: string) {
       isRead: notification.isRead,
       createdAt: notification.createdAt,
     })),
-    unreadCount,
+  };
+}
+
+export async function getTeacherSettingsData(teacherUserId: string) {
+  const context = await getTeacherPortalContext(teacherUserId);
+
+  if (!context) {
+    return null;
+  }
+
+  await ensureClassSchedule(context.grade, context.classroom);
+
+  const [configs, slots] = await Promise.all([
+    getClassScheduleConfigs(context.grade, context.classroom),
+    getReservationSlotsByClassroom(context.grade, context.classroom),
+  ]);
+
+  const weekSummary = buildWeekSlotSummary(slots);
+
+  return {
+    ...context.base,
+    configs: configs.map((config) => {
+      const week = CONSULTATION_WEEKS.find((item) => item.weekKey === config.weekKey);
+      const stats = weekSummary.get(config.weekKey) ?? {
+        totalCount: 0,
+        bookedCount: 0,
+      };
+
+      return {
+        id: config.id,
+        weekKey: config.weekKey,
+        slotIntervalMinutes: config.slotIntervalMinutes,
+        startTime: config.startTime,
+        endTime: config.endTime,
+        weekLabel: week?.label ?? config.weekKey,
+        weekDescription: week?.description ?? "-",
+        totalCount: stats.totalCount,
+        bookedCount: stats.bookedCount,
+      };
+    }),
+  };
+}
+
+export async function getTeacherAvailabilityData(teacherUserId: string) {
+  const context = await getTeacherPortalContext(teacherUserId);
+
+  if (!context) {
+    return null;
+  }
+
+  await ensureClassSchedule(context.grade, context.classroom);
+  const slots = await getRawSlots(context.grade, context.classroom);
+
+  return {
+    ...context.base,
+    weeks: buildWeekCalendar(slots, "teacher"),
   };
 }
 
 export type ParentCalendarData = NonNullable<Awaited<ReturnType<typeof getParentCalendarData>>>;
 export type ParentDashboardData = NonNullable<Awaited<ReturnType<typeof getParentDashboardData>>>;
 export type TeacherDashboardData = NonNullable<Awaited<ReturnType<typeof getTeacherDashboardData>>>;
+export type TeacherSettingsData = NonNullable<Awaited<ReturnType<typeof getTeacherSettingsData>>>;
+export type TeacherAvailabilityData = NonNullable<Awaited<ReturnType<typeof getTeacherAvailabilityData>>>;

@@ -95,6 +95,21 @@ async function ensureWeekSchedule(input: {
     slotIntervalMinutes: config.slotIntervalMinutes,
   });
 
+  const { count, error: countError } = await supabaseAdmin
+    .from("ReservationSlot")
+    .select("id", { count: "exact", head: true })
+    .eq("grade", input.grade)
+    .eq("classroom", input.classroom)
+    .eq("weekKey", input.weekKey);
+
+  if (countError) {
+    throw new Error(`Failed to count reservation slots. ${countError.message}`);
+  }
+
+  if ((count ?? 0) === slotPayload.length) {
+    return;
+  }
+
   const { error } = await supabaseAdmin
     .from("ReservationSlot")
     .upsert(slotPayload, {

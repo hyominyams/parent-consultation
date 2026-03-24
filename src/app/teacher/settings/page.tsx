@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { TeacherPageShell } from "@/components/teacher/teacher-page-shell";
 import { TeacherSettingsClient } from "@/components/teacher/teacher-settings-client";
 import { requireTeacherSession } from "@/lib/auth/guards";
-import { getTeacherDashboardData } from "@/lib/data/portal";
+import { getTeacherSettingsData } from "@/lib/data/portal";
 
 export default async function TeacherSettingsPage() {
   const session = await requireTeacherSession();
-  const data = await getTeacherDashboardData(session.userId);
+  const data = await getTeacherSettingsData(session.userId);
 
   if (!data) {
     redirect("/auth?role=teacher");

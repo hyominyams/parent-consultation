@@ -9,17 +9,17 @@ import {
   toggleTeacherDateAvailabilityAction,
   toggleTeacherSlotAction,
 } from "@/lib/actions/teacher-actions";
-import type { TeacherDashboardData } from "@/lib/data/portal";
+import type { TeacherAvailabilityData } from "@/lib/data/portal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type TeacherAvailabilityClientProps = {
-  data: TeacherDashboardData;
+  data: TeacherAvailabilityData;
 };
 
-type DayItem = TeacherDashboardData["weeks"][number]["days"][number];
+type DayItem = TeacherAvailabilityData["weeks"][number]["days"][number];
 type SlotItem = DayItem["slots"][number];
 
 function getDayStats(day: DayItem) {

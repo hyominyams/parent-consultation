@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { TeacherAvailabilityClient } from "@/components/teacher/teacher-availability-client";
 import { TeacherPageShell } from "@/components/teacher/teacher-page-shell";
 import { requireTeacherSession } from "@/lib/auth/guards";
-import { getTeacherDashboardData } from "@/lib/data/portal";
+import { getTeacherAvailabilityData } from "@/lib/data/portal";
 
 export default async function TeacherAvailabilityPage() {
   const session = await requireTeacherSession();
-  const data = await getTeacherDashboardData(session.userId);
+  const data = await getTeacherAvailabilityData(session.userId);
 
   if (!data) {
     redirect("/auth?role=teacher");
