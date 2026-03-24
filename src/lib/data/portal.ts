@@ -1,6 +1,3 @@
-import { eachDayOfInterval, format } from "date-fns";
-import { ko } from "date-fns/locale";
-
 import { CONSULTATION_WEEKS } from "@/lib/config/schedule";
 import { getTeacherDisplayName } from "@/lib/config/teachers";
 import {
@@ -19,10 +16,18 @@ import type { ParentUserRow, ReservationRow, ReservationSlotRow } from "@/lib/db
 import { ensureClassSchedule } from "@/lib/schedule";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
 import {
+  buildWeekdayDateKeys,
+  formatDateKeyFull,
+  formatDateKeyMonthSlashDay,
+  formatDateKeyWeekday,
   formatGradeClassroom,
+  getDateKeyDayNumber,
+  getDateKeyMonthLabel,
   formatPhoneNumber,
+  isWeekdayDateKey,
   maskStudentName,
   parseTimeLabel,
+  toKstDateKey,
   toClassroomValue,
 } from "@/lib/utils";
 
@@ -33,13 +38,6 @@ type ReservationWithParent = ReservationRow & {
 type SlotWithReservation = ReservationSlotRow & {
   reservation: ReservationWithParent | null;
 };
-
-function buildDayRange(week: (typeof CONSULTATION_WEEKS)[number]) {
-  return eachDayOfInterval({
-    start: new Date(`${week.startDate}T00:00:00+09:00`),
-    end: new Date(`${week.endDate}T00:00:00+09:00`),
-  });
-}
 
 async function getRawSlots(grade: number, classroom: number) {
   const slots = await getReservationSlotsByClassroom(grade, classroom);
@@ -64,7 +62,7 @@ async function getRawSlots(grade: number, classroom: number) {
   })) satisfies SlotWithReservation[];
 }
 
-type SlotSummaryRow = Pick<ReservationSlotRow, "date" | "status" | "weekKey">;
+type SlotSummaryRow = Pick<ReservationSlotRow, "startDateTime" | "status" | "weekKey">;
 
 type TeacherPortalBaseData = {
   teacher: {
@@ -133,10 +131,9 @@ async function getTeacherPortalContext(teacherUserId: string): Promise<TeacherPo
 function buildWeekCalendar(slots: SlotWithReservation[], mode: "parent" | "teacher") {
   return CONSULTATION_WEEKS.map((week) => {
     const weekSlots = slots.filter((slot) => slot.weekKey === week.weekKey);
-    const days = buildDayRange(week).map((day) => {
-      const dateKey = format(day, "yyyy-MM-dd");
+    const days = buildWeekdayDateKeys(week.startDate, week.endDate).map((dateKey) => {
       const daySlots = weekSlots
-        .filter((slot) => format(new Date(slot.date), "yyyy-MM-dd") === dateKey)
+        .filter((slot) => toKstDateKey(slot.startDateTime) === dateKey)
         .map((slot) => {
           const { startLabel, endLabel } = parseTimeLabel(slot.timeLabel);
           const reservation = slot.reservation;
@@ -166,10 +163,10 @@ function buildWeekCalendar(slots: SlotWithReservation[], mode: "parent" | "teach
 
       return {
         dateKey,
-        dayNumber: format(day, "dd"),
-        monthLabel: format(day, "M월", { locale: ko }),
-        weekdayLabel: format(day, "EEE", { locale: ko }),
-        fullLabel: format(day, "M월 d일 (EEE)", { locale: ko }),
+        dayNumber: getDateKeyDayNumber(dateKey),
+        monthLabel: getDateKeyMonthLabel(dateKey),
+        weekdayLabel: formatDateKeyWeekday(dateKey),
+        fullLabel: formatDateKeyFull(dateKey),
         slots: daySlots,
       };
     });
@@ -196,11 +193,15 @@ function buildDailySummary(slots: SlotSummaryRow[]) {
   >();
 
   for (const slot of slots) {
-    const dateKey = format(new Date(slot.date), "yyyy-MM-dd");
+    const dateKey = toKstDateKey(slot.startDateTime);
+
+    if (!isWeekdayDateKey(dateKey)) {
+      continue;
+    }
 
     if (!summary.has(dateKey)) {
       summary.set(dateKey, {
-        label: format(new Date(slot.date), "M/d (EEE)", { locale: ko }),
+        label: `${formatDateKeyMonthSlashDay(dateKey)} (${formatDateKeyWeekday(dateKey)})`,
         total: 0,
         booked: 0,
         blocked: 0,
@@ -245,6 +246,10 @@ function buildWeekSlotSummary(slots: SlotSummaryRow[]) {
   }
 
   for (const slot of slots) {
+    if (!isWeekdayDateKey(toKstDateKey(slot.startDateTime))) {
+      continue;
+    }
+
     const item = summary.get(slot.weekKey);
 
     if (!item) {
@@ -268,10 +273,10 @@ export async function getParentCalendarData(parentUserId: string) {
     return null;
   }
 
-  const reservation = await getReservationByParentUserId(parent.id);
-  const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
   const classroom = toClassroomValue(parent.classroom);
   await ensureClassSchedule(parent.grade, classroom);
+  const reservation = await getReservationByParentUserId(parent.id);
+  const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
 
   const [teacher, slots] = await Promise.all([
     syncTeacherAccount({
@@ -300,7 +305,7 @@ export async function getParentCalendarData(parentUserId: string) {
     reservation: reservation && reservationSlot
       ? {
           id: reservation.id,
-          date: new Date(reservationSlot.date),
+          date: new Date(reservationSlot.startDateTime),
           timeLabel: reservationSlot.timeLabel,
         }
       : null,
@@ -315,9 +320,10 @@ export async function getParentDashboardData(parentUserId: string) {
     return null;
   }
 
+  const classroom = toClassroomValue(parent.classroom);
+  await ensureClassSchedule(parent.grade, classroom);
   const reservation = await getReservationByParentUserId(parent.id);
   const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
-  const classroom = toClassroomValue(parent.classroom);
   const teacher = await syncTeacherAccount({
     grade: parent.grade,
     classroom,
@@ -335,7 +341,7 @@ export async function getParentDashboardData(parentUserId: string) {
     reservation: reservation && reservationSlot
       ? {
           id: reservation.id,
-          date: new Date(reservationSlot.date),
+          date: new Date(reservationSlot.startDateTime),
           timeLabel: reservationSlot.timeLabel,
           weekKey: reservationSlot.weekKey,
           consultationType: reservation.consultationType,
@@ -351,6 +357,7 @@ export async function getTeacherDashboardData(teacherUserId: string) {
     return null;
   }
 
+  await ensureClassSchedule(context.grade, context.classroom);
   const [slots, notifications] = await Promise.all([
     getReservationSlotsByClassroom(context.grade, context.classroom),
     getTeacherNotifications(context.teacherUserId, 12),

@@ -1,12 +1,37 @@
 import { addMinutes, format, isAfter, parse } from "date-fns";
-import { ko } from "date-fns/locale";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import { CONSULTATION_WEEKS } from "@/lib/config/schedule";
 
+const CONSULTATION_TIME_ZONE = "Asia/Seoul";
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const KST_DATE_KEY_FORMATTER = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: CONSULTATION_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const UTC_WEEKDAY_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "UTC",
+  weekday: "short",
+});
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+function parseDateKey(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+}
+
+function formatUtcDateKey(date: Date) {
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0"),
+  ].join("-");
 }
 
 export function toClassroomValue(classroom?: number | null) {
@@ -109,24 +134,79 @@ export function combineKstDateTime(date: string, time: string) {
   return new Date(`${date}T${time}:00+09:00`);
 }
 
+export function shiftDateKey(dateKey: string, days: number) {
+  return formatUtcDateKey(new Date(parseDateKey(dateKey).getTime() + days * ONE_DAY_MS));
+}
+
+export function buildDateKeysInRange(startDate: string, endDate: string) {
+  const dateKeys: string[] = [];
+
+  for (let current = startDate; current <= endDate; current = shiftDateKey(current, 1)) {
+    dateKeys.push(current);
+  }
+
+  return dateKeys;
+}
+
+export function isWeekdayDateKey(dateKey: string) {
+  const weekday = parseDateKey(dateKey).getUTCDay();
+  return weekday >= 1 && weekday <= 5;
+}
+
+export function buildWeekdayDateKeys(startDate: string, endDate: string) {
+  return buildDateKeysInRange(startDate, endDate).filter(isWeekdayDateKey);
+}
+
+export function toKstDateKey(value: Date | string) {
+  return KST_DATE_KEY_FORMATTER.format(value instanceof Date ? value : new Date(value));
+}
+
+export function formatDateKeyWeekday(dateKey: string) {
+  return UTC_WEEKDAY_FORMATTER.format(parseDateKey(dateKey));
+}
+
+export function formatDateKeyMonthDay(dateKey: string) {
+  const parsed = parseDateKey(dateKey);
+  return `${parsed.getUTCMonth() + 1}월 ${parsed.getUTCDate()}일`;
+}
+
+export function formatDateKeyFull(dateKey: string) {
+  return `${formatDateKeyMonthDay(dateKey)} (${formatDateKeyWeekday(dateKey)})`;
+}
+
+export function formatDateKeyMonthSlashDay(dateKey: string) {
+  const parsed = parseDateKey(dateKey);
+  return `${parsed.getUTCMonth() + 1}/${parsed.getUTCDate()}`;
+}
+
+export function getDateKeyDayNumber(dateKey: string) {
+  return String(parseDateKey(dateKey).getUTCDate()).padStart(2, "0");
+}
+
+export function getDateKeyMonthLabel(dateKey: string) {
+  return `${parseDateKey(dateKey).getUTCMonth() + 1}월`;
+}
+
 export function weekKeyToRange(weekKey: string) {
   return CONSULTATION_WEEKS.find((week) => week.weekKey === weekKey) ?? null;
 }
 
-export function formatFullDate(date: Date) {
-  return format(date, "yyyy년 M월 d일 (EEE)", { locale: ko });
+export function formatFullDate(date: Date | string) {
+  const dateKey = toKstDateKey(date);
+  const [year] = dateKey.split("-");
+  return `${year}년 ${formatDateKeyFull(dateKey)}`;
 }
 
-export function formatShortDate(date: Date) {
-  return format(date, "M월 d일", { locale: ko });
+export function formatShortDate(date: Date | string) {
+  return formatDateKeyMonthDay(toKstDateKey(date));
 }
 
-export function formatWeekday(date: Date) {
-  return format(date, "EEE", { locale: ko });
+export function formatWeekday(date: Date | string) {
+  return formatDateKeyWeekday(toKstDateKey(date));
 }
 
-export function formatMonthDay(date: Date) {
-  return format(date, "M/d", { locale: ko });
+export function formatMonthDay(date: Date | string) {
+  return formatDateKeyMonthSlashDay(toKstDateKey(date));
 }
 
 export function buildFieldErrors(

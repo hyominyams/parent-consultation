@@ -1,10 +1,8 @@
-import { eachDayOfInterval, format } from "date-fns";
-
 import { CONSULTATION_WEEK_KEYS, DEFAULT_SCHEDULE_CONFIG, CONSULTATION_WEEKS } from "@/lib/config/schedule";
 import { createId, nowIsoString, requireData, requireMaybeSingle } from "@/lib/db/helpers";
 import { supabaseAdmin } from "@/lib/db/supabase";
 import type { ClassScheduleConfigRow } from "@/lib/db/types";
-import { combineKstDateTime, generateTimeBlocks } from "@/lib/utils";
+import { buildWeekdayDateKeys, combineKstDateTime, generateTimeBlocks, shiftDateKey } from "@/lib/utils";
 
 export function buildSlotPayload(input: {
   grade: number;
@@ -22,27 +20,74 @@ export function buildSlotPayload(input: {
     slotIntervalMinutes: input.slotIntervalMinutes,
   });
 
-  const days = eachDayOfInterval({
-    start: combineKstDateTime(input.startDate, "00:00"),
-    end: combineKstDateTime(input.endDate, "00:00"),
-  });
-
-  return days.flatMap((day) => {
-    const isoDate = format(day, "yyyy-MM-dd");
-
-    return timeBlocks.map((block) => ({
+  return buildWeekdayDateKeys(input.startDate, input.endDate).flatMap((dateKey) =>
+    timeBlocks.map((block) => ({
       id: createId(),
       grade: input.grade,
       classroom: input.classroom,
       weekKey: input.weekKey,
-      date: combineKstDateTime(isoDate, "00:00").toISOString(),
+      date: combineKstDateTime(dateKey, "00:00").toISOString(),
       timeLabel: block.timeLabel,
-      startDateTime: combineKstDateTime(isoDate, block.startLabel).toISOString(),
-      endDateTime: combineKstDateTime(isoDate, block.endLabel).toISOString(),
+      startDateTime: combineKstDateTime(dateKey, block.startLabel).toISOString(),
+      endDateTime: combineKstDateTime(dateKey, block.endLabel).toISOString(),
       status: "OPEN" as const,
       updatedAt: nowIsoString(),
-    }));
-  });
+    })),
+  );
+}
+
+async function updateSlotTiming(
+  slotId: string,
+  input: {
+    date: string;
+    timeLabel: string;
+    startDateTime: string;
+    endDateTime: string;
+  },
+) {
+  const { error } = await supabaseAdmin
+    .from("ReservationSlot")
+    .update({
+      date: input.date,
+      timeLabel: input.timeLabel,
+      startDateTime: input.startDateTime,
+      endDateTime: input.endDateTime,
+      updatedAt: nowIsoString(),
+    })
+    .eq("id", slotId);
+
+  if (error) {
+    throw new Error(`Failed to update reservation slot timing. ${error.message}`);
+  }
+}
+
+function buildTemporarySlotWindow(index: number) {
+  const dateKey = shiftDateKey("2099-01-01", index);
+  return {
+    date: combineKstDateTime(dateKey, "00:00").toISOString(),
+    timeLabel: `TMP-${index + 1}`,
+    startDateTime: combineKstDateTime(dateKey, "00:00").toISOString(),
+    endDateTime: combineKstDateTime(dateKey, "00:01").toISOString(),
+  };
+}
+
+async function alignExistingWeekSlots(input: {
+  existingSlots: Array<{
+    id: string;
+    startDateTime: string;
+  }>;
+  slotPayload: ReturnType<typeof buildSlotPayload>;
+}) {
+  const matchedCount = Math.min(input.existingSlots.length, input.slotPayload.length);
+
+  for (let index = 0; index < matchedCount; index += 1) {
+    await updateSlotTiming(input.existingSlots[index].id, buildTemporarySlotWindow(index));
+  }
+
+  for (let index = 0; index < matchedCount; index += 1) {
+    const slot = input.slotPayload[index];
+    await updateSlotTiming(input.existingSlots[index].id, slot);
+  }
 }
 
 async function ensureWeekSchedule(input: {
@@ -95,30 +140,102 @@ async function ensureWeekSchedule(input: {
     slotIntervalMinutes: config.slotIntervalMinutes,
   });
 
-  const { count, error: countError } = await supabaseAdmin
+  const existingSlotsResult = await supabaseAdmin
     .from("ReservationSlot")
-    .select("id", { count: "exact", head: true })
+    .select("id, date, timeLabel, startDateTime, endDateTime")
     .eq("grade", input.grade)
     .eq("classroom", input.classroom)
-    .eq("weekKey", input.weekKey);
+    .eq("weekKey", input.weekKey)
+    .order("startDateTime", { ascending: true });
 
-  if (countError) {
-    throw new Error(`Failed to count reservation slots. ${countError.message}`);
+  if (existingSlotsResult.error) {
+    throw new Error(`Failed to load reservation slots. ${existingSlotsResult.error.message}`);
   }
 
-  if ((count ?? 0) === slotPayload.length) {
+  const existingSlots = existingSlotsResult.data ?? [];
+  const slotPayloadByTime = [...slotPayload].sort((a, b) => a.startDateTime.localeCompare(b.startDateTime));
+  const scheduleMatches =
+    existingSlots.length === slotPayloadByTime.length &&
+    existingSlots.every((slot, index) => {
+      const targetSlot = slotPayloadByTime[index];
+      return (
+        slot.date === targetSlot.date &&
+        slot.timeLabel === targetSlot.timeLabel &&
+        slot.startDateTime === targetSlot.startDateTime &&
+        slot.endDateTime === targetSlot.endDateTime
+      );
+    });
+
+  if (scheduleMatches) {
     return;
   }
 
-  const { error } = await supabaseAdmin
-    .from("ReservationSlot")
-    .upsert(slotPayload, {
-      onConflict: "grade,classroom,startDateTime",
-      ignoreDuplicates: true,
-    });
+  const existingSlotIds = existingSlots.map((slot) => slot.id);
+  const reservationsResult =
+    existingSlotIds.length > 0
+      ? await supabaseAdmin.from("Reservation").select("slotId").in("slotId", existingSlotIds)
+      : { data: [], error: null };
 
-  if (error) {
-    throw new Error(`Failed to ensure reservation slots. ${error.message}`);
+  if (reservationsResult.error) {
+    throw new Error(`Failed to load existing reservations. ${reservationsResult.error.message}`);
+  }
+
+  const reservedSlotIds = new Set((reservationsResult.data ?? []).map((reservation) => reservation.slotId));
+
+  if (reservedSlotIds.size === 0) {
+    if (existingSlotIds.length > 0) {
+      const { error: deleteError } = await supabaseAdmin
+        .from("ReservationSlot")
+        .delete()
+        .eq("grade", input.grade)
+        .eq("classroom", input.classroom)
+        .eq("weekKey", input.weekKey);
+
+      if (deleteError) {
+        throw new Error(`Failed to replace reservation slots. ${deleteError.message}`);
+      }
+    }
+
+    const { error: insertError } = await supabaseAdmin.from("ReservationSlot").insert(slotPayload);
+
+    if (insertError) {
+      throw new Error(`Failed to insert reservation slots. ${insertError.message}`);
+    }
+
+    return;
+  }
+
+  await alignExistingWeekSlots({
+    existingSlots,
+    slotPayload: slotPayloadByTime,
+  });
+
+  if (slotPayloadByTime.length > existingSlots.length) {
+    const { error: insertError } = await supabaseAdmin
+      .from("ReservationSlot")
+      .insert(slotPayloadByTime.slice(existingSlots.length));
+
+    if (insertError) {
+      throw new Error(`Failed to insert missing reservation slots. ${insertError.message}`);
+    }
+  }
+
+  if (existingSlots.length > slotPayloadByTime.length) {
+    const removableSlotIds = existingSlots
+      .slice(slotPayloadByTime.length)
+      .map((slot) => slot.id)
+      .filter((slotId) => !reservedSlotIds.has(slotId));
+
+    if (removableSlotIds.length > 0) {
+      const { error: deleteError } = await supabaseAdmin
+        .from("ReservationSlot")
+        .delete()
+        .in("id", removableSlotIds);
+
+      if (deleteError) {
+        throw new Error(`Failed to remove obsolete reservation slots. ${deleteError.message}`);
+      }
+    }
   }
 }
 
