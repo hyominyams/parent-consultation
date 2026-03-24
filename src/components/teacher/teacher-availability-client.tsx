@@ -76,6 +76,25 @@ function getSlotTone(slot: SlotItem) {
   };
 }
 
+function SlotTimeLabel({
+  startLabel,
+  endLabel,
+}: {
+  startLabel: string;
+  endLabel: string;
+}) {
+  return (
+    <span className="flex flex-col leading-tight">
+      <span className="text-[0.98rem] font-semibold text-[color:var(--text-strong)]">
+        {startLabel}
+      </span>
+      <span className="mt-0.5 text-[12px] font-medium text-[color:var(--text-muted)]">
+        종료 {endLabel}
+      </span>
+    </span>
+  );
+}
+
 export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientProps) {
   const router = useRouter();
   const [selectedWeekKey, setSelectedWeekKey] = useState(data.weeks[0]?.weekKey ?? "");
@@ -228,9 +247,7 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                           slotTone.className,
                         )}
                       >
-                        <span className="text-sm font-semibold">
-                          {slot.startLabel} - {slot.endLabel}
-                        </span>
+                        <SlotTimeLabel startLabel={slot.startLabel} endLabel={slot.endLabel} />
                         <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--primary)]">
                           {slot.reservedStudentName ?? slotTone.label}
                         </span>
@@ -246,9 +263,7 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                           slotTone.className,
                         )}
                       >
-                        <span className="text-sm font-semibold">
-                          {slot.startLabel} - {slot.endLabel}
-                        </span>
+                        <SlotTimeLabel startLabel={slot.startLabel} endLabel={slot.endLabel} />
                         <span className="shrink-0 rounded-full bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[color:var(--primary)]">
                           {pendingKey === `slot:${slot.id}` ? "처리 중..." : slotTone.label}
                         </span>
