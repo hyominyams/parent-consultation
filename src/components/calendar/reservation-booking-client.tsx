@@ -138,6 +138,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   const router = useRouter();
   const desktopCtaOffset = useWheelReactiveCtaMotion(true);
   const unavailableSelectionToastRef = useRef<string | null>(null);
+  const submittingSlotIdRef = useRef<string | null>(null);
   const successRedirectPendingRef = useRef(false);
   const [selectedWeekKey, setSelectedWeekKey] = useState(data.weeks[0]?.weekKey ?? "");
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -150,7 +151,12 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!data.hasReservation || successModalOpen || successRedirectPendingRef.current) {
+    if (
+      !data.hasReservation ||
+      successModalOpen ||
+      successRedirectPendingRef.current ||
+      submittingSlotIdRef.current
+    ) {
       return;
     }
 
@@ -174,6 +180,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
     }, 200);
 
     const redirectTimer = window.setTimeout(() => {
+      submittingSlotIdRef.current = null;
       successRedirectPendingRef.current = false;
       setSuccessModalOpen(false);
       router.push(successRedirectTo);
@@ -249,7 +256,13 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   }, [pending, router, successModalOpen]);
 
   useEffect(() => {
-    if (!selectedSlot || successModalOpen || !selectedSlotUnavailable) {
+    const suppressUnavailableToast =
+      successModalOpen ||
+      successRedirectPendingRef.current ||
+      data.hasReservation ||
+      submittingSlotIdRef.current === selectedSlot?.id;
+
+    if (!selectedSlot || suppressUnavailableToast || !selectedSlotUnavailable) {
       unavailableSelectionToastRef.current = null;
       return;
     }
@@ -260,17 +273,20 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
 
     unavailableSelectionToastRef.current = selectedSlot.id;
     toast.error(selectedSlot.status === "BLOCKED" ? BLOCKED_SLOT_MESSAGE : TAKEN_SLOT_MESSAGE);
-  }, [selectedSlot, selectedSlotUnavailable, successModalOpen]);
+  }, [data.hasReservation, selectedSlot, selectedSlotUnavailable, successModalOpen]);
 
   async function handleBook() {
     if (!selectedSlot || selectedSlotUnavailable) {
       return;
     }
 
+    submittingSlotIdRef.current = selectedSlot.id;
+
     startTransition(async () => {
       const result = await bookReservationAction(selectedSlot.id, consultationType);
 
       if (result.status === "error") {
+        submittingSlotIdRef.current = null;
         successRedirectPendingRef.current = false;
         toast.error(result.message);
         router.refresh();
@@ -286,6 +302,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   }
 
   function handleSuccessRedirect() {
+    submittingSlotIdRef.current = null;
     successRedirectPendingRef.current = false;
     setSuccessModalOpen(false);
     router.push(successRedirectTo);
