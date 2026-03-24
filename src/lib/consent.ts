@@ -1,26 +1,31 @@
-import { UserType } from "@prisma/client";
-
 import { CONSENT_VERSION } from "@/lib/config/consent";
-import { prisma } from "@/lib/db/prisma";
+import { createId } from "@/lib/db/helpers";
+import { supabaseAdmin } from "@/lib/db/supabase";
 
 export async function hasParentConsent(parentUserId: string) {
-  const record = await prisma.consentRecord.findFirst({
-    where: {
-      parentUserId,
-    },
-  });
+  const { count, error } = await supabaseAdmin
+    .from("ConsentRecord")
+    .select("id", { count: "exact", head: true })
+    .eq("parentUserId", parentUserId);
 
-  return Boolean(record);
+  if (error) {
+    throw new Error(`Failed to check parent consent. ${error.message}`);
+  }
+
+  return Boolean(count);
 }
 
 export async function hasTeacherConsent(teacherUserId: string) {
-  const record = await prisma.consentRecord.findFirst({
-    where: {
-      teacherUserId,
-    },
-  });
+  const { count, error } = await supabaseAdmin
+    .from("ConsentRecord")
+    .select("id", { count: "exact", head: true })
+    .eq("teacherUserId", teacherUserId);
 
-  return Boolean(record);
+  if (error) {
+    throw new Error(`Failed to check teacher consent. ${error.message}`);
+  }
+
+  return Boolean(count);
 }
 
 export async function ensureParentConsent(
@@ -35,15 +40,19 @@ export async function ensureParentConsent(
     throw new Error("CONSENT_REQUIRED");
   }
 
-  await prisma.consentRecord.create({
-    data: {
-      userType: UserType.PARENT,
-      parentUserId,
-      privacyConsent: true,
-      thirdPartyConsent: true,
-      consentVersion: CONSENT_VERSION,
-    },
+  const { error } = await supabaseAdmin.from("ConsentRecord").insert({
+    id: createId(),
+    userType: "PARENT",
+    parentUserId,
+    teacherUserId: null,
+    privacyConsent: true,
+    thirdPartyConsent: true,
+    consentVersion: CONSENT_VERSION,
   });
+
+  if (error) {
+    throw new Error(`Failed to save parent consent. ${error.message}`);
+  }
 }
 
 export async function ensureTeacherConsent(
@@ -58,13 +67,17 @@ export async function ensureTeacherConsent(
     throw new Error("CONSENT_REQUIRED");
   }
 
-  await prisma.consentRecord.create({
-    data: {
-      userType: UserType.TEACHER,
-      teacherUserId,
-      privacyConsent: true,
-      thirdPartyConsent: true,
-      consentVersion: CONSENT_VERSION,
-    },
+  const { error } = await supabaseAdmin.from("ConsentRecord").insert({
+    id: createId(),
+    userType: "TEACHER",
+    parentUserId: null,
+    teacherUserId,
+    privacyConsent: true,
+    thirdPartyConsent: true,
+    consentVersion: CONSENT_VERSION,
   });
+
+  if (error) {
+    throw new Error(`Failed to save teacher consent. ${error.message}`);
+  }
 }

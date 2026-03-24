@@ -1,11 +1,10 @@
-import { Prisma, SlotStatus } from "@prisma/client";
 import { eachDayOfInterval, format } from "date-fns";
 
 import { DEFAULT_SCHEDULE_CONFIG, CONSULTATION_WEEKS } from "@/lib/config/schedule";
-import { prisma } from "@/lib/db/prisma";
+import { createId, nowIsoString, requireMaybeSingle } from "@/lib/db/helpers";
+import { supabaseAdmin } from "@/lib/db/supabase";
+import type { ClassScheduleConfigRow } from "@/lib/db/types";
 import { combineKstDateTime, generateTimeBlocks } from "@/lib/utils";
-
-type ScheduleClient = typeof prisma | Prisma.TransactionClient;
 
 export function buildSlotPayload(input: {
   grade: number;
@@ -32,55 +31,57 @@ export function buildSlotPayload(input: {
     const isoDate = format(day, "yyyy-MM-dd");
 
     return timeBlocks.map((block) => ({
+      id: createId(),
       grade: input.grade,
       classroom: input.classroom,
       weekKey: input.weekKey,
-      date: combineKstDateTime(isoDate, "00:00"),
+      date: combineKstDateTime(isoDate, "00:00").toISOString(),
       timeLabel: block.timeLabel,
-      startDateTime: combineKstDateTime(isoDate, block.startLabel),
-      endDateTime: combineKstDateTime(isoDate, block.endLabel),
-      status: SlotStatus.OPEN,
+      startDateTime: combineKstDateTime(isoDate, block.startLabel).toISOString(),
+      endDateTime: combineKstDateTime(isoDate, block.endLabel).toISOString(),
+      status: "OPEN" as const,
+      updatedAt: nowIsoString(),
     }));
   });
 }
 
-async function ensureWeekSchedule(
-  client: ScheduleClient,
-  input: {
-    grade: number;
-    classroom: number;
-    weekKey: string;
-    startDate: string;
-    endDate: string;
-  },
-) {
-  const config = await client.classScheduleConfig.upsert({
-    where: {
-      grade_classroom_weekKey: {
+async function ensureWeekSchedule(input: {
+  grade: number;
+  classroom: number;
+  weekKey: string;
+  startDate: string;
+  endDate: string;
+}) {
+  let config = requireMaybeSingle<ClassScheduleConfigRow>(
+    await supabaseAdmin
+      .from("ClassScheduleConfig")
+      .select("*")
+      .eq("grade", input.grade)
+      .eq("classroom", input.classroom)
+      .eq("weekKey", input.weekKey)
+      .maybeSingle(),
+    "Failed to load class schedule config.",
+  );
+
+  if (!config) {
+    const { data, error } = await supabaseAdmin
+      .from("ClassScheduleConfig")
+      .insert({
+        id: createId(),
         grade: input.grade,
         classroom: input.classroom,
         weekKey: input.weekKey,
-      },
-    },
-    update: {},
-    create: {
-      grade: input.grade,
-      classroom: input.classroom,
-      weekKey: input.weekKey,
-      ...DEFAULT_SCHEDULE_CONFIG,
-    },
-  });
+        ...DEFAULT_SCHEDULE_CONFIG,
+        updatedAt: nowIsoString(),
+      })
+      .select("*")
+      .single();
 
-  const slotCount = await client.reservationSlot.count({
-    where: {
-      grade: input.grade,
-      classroom: input.classroom,
-      weekKey: input.weekKey,
-    },
-  });
+    if (error) {
+      throw new Error(`Failed to create class schedule config. ${error.message}`);
+    }
 
-  if (slotCount > 0) {
-    return;
+    config = data as ClassScheduleConfigRow;
   }
 
   const slotPayload = buildSlotPayload({
@@ -94,24 +95,28 @@ async function ensureWeekSchedule(
     slotIntervalMinutes: config.slotIntervalMinutes,
   });
 
-  await client.reservationSlot.createMany({
-    data: slotPayload,
-    skipDuplicates: true,
-  });
+  const { error } = await supabaseAdmin
+    .from("ReservationSlot")
+    .upsert(slotPayload, {
+      onConflict: "grade,classroom,startDateTime",
+      ignoreDuplicates: true,
+    });
+
+  if (error) {
+    throw new Error(`Failed to ensure reservation slots. ${error.message}`);
+  }
 }
 
 export async function ensureClassSchedule(grade: number, classroom: number) {
-  await prisma.$transaction(async (tx) => {
-    for (const week of CONSULTATION_WEEKS) {
-      await ensureWeekSchedule(tx, {
-        grade,
-        classroom,
-        weekKey: week.weekKey,
-        startDate: week.startDate,
-        endDate: week.endDate,
-      });
-    }
-  });
+  for (const week of CONSULTATION_WEEKS) {
+    await ensureWeekSchedule({
+      grade,
+      classroom,
+      weekKey: week.weekKey,
+      startDate: week.startDate,
+      endDate: week.endDate,
+    });
+  }
 }
 
 export async function rebuildWeekSlots(input: {
@@ -128,64 +133,83 @@ export async function rebuildWeekSlots(input: {
     throw new Error("존재하지 않는 주차 설정입니다.");
   }
 
-  const reservationCount = await prisma.reservation.count({
-    where: {
-      slot: {
-        grade: input.grade,
-        classroom: input.classroom,
-        weekKey: input.weekKey,
-      },
-    },
-  });
+  const existingSlotIds =
+    (
+      await supabaseAdmin
+        .from("ReservationSlot")
+        .select("id")
+        .eq("grade", input.grade)
+        .eq("classroom", input.classroom)
+        .eq("weekKey", input.weekKey)
+    ).data?.map((slot) => slot.id) ?? [];
 
-  if (reservationCount > 0) {
+  const reservationCountResult =
+    existingSlotIds.length > 0
+      ? await supabaseAdmin
+          .from("Reservation")
+          .select("id", { count: "exact", head: true })
+          .in("slotId", existingSlotIds)
+      : { count: 0, error: null };
+
+  if (reservationCountResult.error) {
+    throw new Error(`예약 상태 확인 중 문제가 발생했습니다. ${reservationCountResult.error.message}`);
+  }
+
+  if ((reservationCountResult.count ?? 0) > 0) {
     throw new Error("이미 예약이 존재하는 주차는 시간 설정을 바꿀 수 없습니다.");
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.classScheduleConfig.upsert({
-      where: {
-        grade_classroom_weekKey: {
-          grade: input.grade,
-          classroom: input.classroom,
-          weekKey: input.weekKey,
-        },
-      },
-      update: {
-        slotIntervalMinutes: input.slotIntervalMinutes,
-        startTime: input.startTime,
-        endTime: input.endTime,
-      },
-      create: {
-        grade: input.grade,
-        classroom: input.classroom,
-        weekKey: input.weekKey,
-        slotIntervalMinutes: input.slotIntervalMinutes,
-        startTime: input.startTime,
-        endTime: input.endTime,
-      },
-    });
+  const updatedAt = nowIsoString();
 
-    await tx.reservationSlot.deleteMany({
-      where: {
+  const { data: config, error: configError } = await supabaseAdmin
+    .from("ClassScheduleConfig")
+    .upsert(
+      {
+        id: createId(),
         grade: input.grade,
         classroom: input.classroom,
         weekKey: input.weekKey,
-      },
-    });
-
-    await tx.reservationSlot.createMany({
-      data: buildSlotPayload({
-        grade: input.grade,
-        classroom: input.classroom,
-        weekKey: input.weekKey,
-        startDate: week.startDate,
-        endDate: week.endDate,
+        slotIntervalMinutes: input.slotIntervalMinutes,
         startTime: input.startTime,
         endTime: input.endTime,
-        slotIntervalMinutes: input.slotIntervalMinutes,
-      }),
-      skipDuplicates: true,
-    });
+        updatedAt,
+      },
+      {
+        onConflict: "grade,classroom,weekKey",
+      },
+    )
+    .select("*")
+    .single();
+
+  if (configError || !config) {
+    throw new Error(`설정 저장 중 문제가 발생했습니다. ${configError?.message ?? ""}`.trim());
+  }
+
+  const { error: deleteError } = await supabaseAdmin
+    .from("ReservationSlot")
+    .delete()
+    .eq("grade", input.grade)
+    .eq("classroom", input.classroom)
+    .eq("weekKey", input.weekKey);
+
+  if (deleteError) {
+    throw new Error(`기존 시간표 삭제 중 문제가 발생했습니다. ${deleteError.message}`);
+  }
+
+  const slotPayload = buildSlotPayload({
+    grade: input.grade,
+    classroom: input.classroom,
+    weekKey: input.weekKey,
+    startDate: week.startDate,
+    endDate: week.endDate,
+    startTime: input.startTime,
+    endTime: input.endTime,
+    slotIntervalMinutes: input.slotIntervalMinutes,
   });
+
+  const { error: insertError } = await supabaseAdmin.from("ReservationSlot").insert(slotPayload);
+
+  if (insertError) {
+    throw new Error(`새 시간표 생성 중 문제가 발생했습니다. ${insertError.message}`);
+  }
 }

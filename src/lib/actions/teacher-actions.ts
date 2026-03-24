@@ -1,10 +1,10 @@
 "use server";
 
-import { SlotStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { requireTeacherSession } from "@/lib/auth/guards";
-import { prisma } from "@/lib/db/prisma";
+import { getReservationsBySlotIds, getReservationSlotsByDate, getReservationSlotById } from "@/lib/db/queries";
+import { supabaseAdmin } from "@/lib/db/supabase";
 import { rebuildWeekSlots } from "@/lib/schedule";
 import { combineKstDateTime } from "@/lib/utils";
 import {
@@ -34,14 +34,7 @@ export async function toggleTeacherSlotAction(slotId: string): Promise<ActionSta
     };
   }
 
-  const slot = await prisma.reservationSlot.findUnique({
-    where: {
-      id: parsed.data.slotId,
-    },
-    include: {
-      reservation: true,
-    },
-  });
+  const slot = await getReservationSlotById(parsed.data.slotId);
 
   if (!slot || slot.grade !== session.grade || slot.classroom !== session.classroom) {
     return {
@@ -50,21 +43,31 @@ export async function toggleTeacherSlotAction(slotId: string): Promise<ActionSta
     };
   }
 
-  if (slot.reservation || slot.status === SlotStatus.BOOKED) {
+  const reservations = await getReservationsBySlotIds([slot.id]);
+
+  if (reservations.length > 0 || slot.status === "BOOKED") {
     return {
       status: "error",
       message: "이미 예약된 슬롯은 변경할 수 없습니다.",
     };
   }
 
-  await prisma.reservationSlot.update({
-    where: {
-      id: slot.id,
-    },
-    data: {
-      status: slot.status === SlotStatus.BLOCKED ? SlotStatus.OPEN : SlotStatus.BLOCKED,
-    },
-  });
+  const nextStatus = slot.status === "BLOCKED" ? "OPEN" : "BLOCKED";
+  const { error } = await supabaseAdmin
+    .from("ReservationSlot")
+    .update({
+      status: nextStatus,
+      updatedAt: new Date().toISOString(),
+    })
+    .eq("id", slot.id)
+    .eq("status", slot.status);
+
+  if (error) {
+    return {
+      status: "error",
+      message: "슬롯 상태 변경 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    };
+  }
 
   revalidateTeacherPortal();
   revalidatePath("/reserve");
@@ -72,7 +75,7 @@ export async function toggleTeacherSlotAction(slotId: string): Promise<ActionSta
   return {
     status: "success",
     message:
-      slot.status === SlotStatus.BLOCKED
+      slot.status === "BLOCKED"
         ? "슬롯을 다시 신청 가능 상태로 열었습니다."
         : "슬롯을 신청 불가 상태로 변경했습니다.",
   };
@@ -89,19 +92,11 @@ export async function toggleTeacherDateAvailabilityAction(dateKey: string): Prom
     };
   }
 
-  const slots = await prisma.reservationSlot.findMany({
-    where: {
-      grade: session.grade,
-      classroom: session.classroom,
-      date: combineKstDateTime(parsed.data.dateKey, "00:00"),
-    },
-    include: {
-      reservation: true,
-    },
-    orderBy: {
-      startDateTime: "asc",
-    },
-  });
+  const slots = await getReservationSlotsByDate(
+    session.grade,
+    session.classroom,
+    combineKstDateTime(parsed.data.dateKey, "00:00").toISOString(),
+  );
 
   if (slots.length === 0) {
     return {
@@ -110,7 +105,9 @@ export async function toggleTeacherDateAvailabilityAction(dateKey: string): Prom
     };
   }
 
-  const modifiableSlots = slots.filter((slot) => !slot.reservation && slot.status !== SlotStatus.BOOKED);
+  const reservations = await getReservationsBySlotIds(slots.map((slot) => slot.id));
+  const reservedSlotIds = new Set(reservations.map((reservation) => reservation.slotId));
+  const modifiableSlots = slots.filter((slot) => !reservedSlotIds.has(slot.id) && slot.status !== "BOOKED");
 
   if (modifiableSlots.length === 0) {
     return {
@@ -119,18 +116,21 @@ export async function toggleTeacherDateAvailabilityAction(dateKey: string): Prom
     };
   }
 
-  const shouldOpen = modifiableSlots.every((slot) => slot.status === SlotStatus.BLOCKED);
+  const shouldOpen = modifiableSlots.every((slot) => slot.status === "BLOCKED");
+  const { error } = await supabaseAdmin
+    .from("ReservationSlot")
+    .update({
+      status: shouldOpen ? "OPEN" : "BLOCKED",
+      updatedAt: new Date().toISOString(),
+    })
+    .in("id", modifiableSlots.map((slot) => slot.id));
 
-  await prisma.reservationSlot.updateMany({
-    where: {
-      id: {
-        in: modifiableSlots.map((slot) => slot.id),
-      },
-    },
-    data: {
-      status: shouldOpen ? SlotStatus.OPEN : SlotStatus.BLOCKED,
-    },
-  });
+  if (error) {
+    return {
+      status: "error",
+      message: "날짜 상태 변경 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    };
+  }
 
   revalidateTeacherPortal();
   revalidatePath("/reserve");
@@ -197,15 +197,20 @@ export async function markTeacherNotificationReadAction(
     };
   }
 
-  await prisma.teacherNotification.updateMany({
-    where: {
-      id: parsed.data.notificationId,
-      teacherUserId: session.userId,
-    },
-    data: {
+  const { error } = await supabaseAdmin
+    .from("TeacherNotification")
+    .update({
       isRead: true,
-    },
-  });
+    })
+    .eq("id", parsed.data.notificationId)
+    .eq("teacherUserId", session.userId);
+
+  if (error) {
+    return {
+      status: "error",
+      message: "알림 읽음 처리 중 문제가 발생했습니다.",
+    };
+  }
 
   revalidateTeacherPortal();
 
@@ -218,15 +223,20 @@ export async function markTeacherNotificationReadAction(
 export async function markAllTeacherNotificationsReadAction(): Promise<ActionState> {
   const session = await requireTeacherSession();
 
-  await prisma.teacherNotification.updateMany({
-    where: {
-      teacherUserId: session.userId,
-      isRead: false,
-    },
-    data: {
+  const { error } = await supabaseAdmin
+    .from("TeacherNotification")
+    .update({
       isRead: true,
-    },
-  });
+    })
+    .eq("teacherUserId", session.userId)
+    .eq("isRead", false);
+
+  if (error) {
+    return {
+      status: "error",
+      message: "알림 읽음 처리 중 문제가 발생했습니다.",
+    };
+  }
 
   revalidateTeacherPortal();
 

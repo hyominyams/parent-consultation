@@ -1,6 +1,6 @@
 # Parent Consultation Portal
 
-Parent consultation booking portal built with Next.js, Prisma, and Supabase Postgres.
+Parent consultation booking portal built with Next.js and Supabase.
 
 ## Stack
 
@@ -8,8 +8,7 @@ Parent consultation booking portal built with Next.js, Prisma, and Supabase Post
 - React 19
 - TypeScript
 - Tailwind CSS v4
-- Prisma
-- Supabase Postgres
+- Supabase
 - React Hook Form
 - Zod
 
@@ -25,8 +24,6 @@ Parent consultation booking portal built with Next.js, Prisma, and Supabase Post
 
 Copy `.env.example` to `.env` and set these values:
 
-- `DATABASE_URL`
-- `DIRECT_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -39,7 +36,8 @@ Copy `.env.example` to `.env` and set these values:
 
 ```bash
 npm install
-npm run db:generate
+npx supabase login --token <SUPABASE_ACCESS_TOKEN>
+npx supabase link --project-ref <SUPABASE_PROJECT_REF> --password <SUPABASE_DB_PASSWORD>
 npm run db:push
 npm run db:seed
 npm run dev
@@ -49,20 +47,11 @@ Open `http://localhost:3000`.
 
 ## Supabase Migration Workflow
 
-Prisma schema lives in `prisma/schema.prisma`.
-
 Supabase migration files live in `supabase/migrations`.
 
 This repository now includes the initial Supabase migration:
 
 - `supabase/migrations/20260323160000_init.sql`
-
-To link a Supabase project:
-
-```bash
-npx supabase login --token <SUPABASE_ACCESS_TOKEN>
-npx supabase link --project-ref <SUPABASE_PROJECT_REF> --password <SUPABASE_DB_PASSWORD>
-```
 
 To push pending Supabase migrations:
 
@@ -70,7 +59,7 @@ To push pending Supabase migrations:
 npx supabase db push --linked
 ```
 
-To seed data with Prisma:
+To seed data with Supabase service-role access:
 
 ```bash
 npm run db:seed
@@ -80,23 +69,14 @@ npm run db:seed
 
 Set the same environment variables from `.env.example` in the Vercel project settings.
 
-Important for Supabase + Prisma on Vercel:
+Important for Vercel deployment:
 
-- `DATABASE_URL` should use the Supabase transaction pooler / Supavisor connection string.
-- `DIRECT_URL` should use the direct database connection string for Prisma CLI workflows.
+- This app now uses Supabase-only server access via `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
 
 Important notes:
 
-- `postinstall` runs `prisma generate` automatically during install.
 - Production database changes should be applied with Supabase migrations before or during deployment.
 - Seed data is not part of Vercel build. Run `npm run db:seed` manually only when you want sample data in the remote database.
-- If Vercel shows intermittent server errors or the app feels slow, check that `DATABASE_URL` is not pointing at the direct `db.<project-ref>.supabase.co:5432` host.
-
-## Sample Teacher Accounts
-
-- Grade 6 Class 1: `teacher6101`
-- Grade 5 Class 2: `teacher5202`
-- Grade 4 Class 3: `teacher4303`
 
 ## Verification
 

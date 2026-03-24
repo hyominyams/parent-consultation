@@ -3,6 +3,7 @@ import { z } from "zod";
 import { isValidKoreanPhone, normalizePhone } from "@/lib/utils";
 
 const checkboxSchema = z.preprocess((value) => value === "on" || value === true, z.boolean());
+const entityIdSchema = z.string().trim().min(1, "잘못된 식별자입니다.");
 
 const classroomSchema = z.preprocess((value) => {
   if (value === "" || value === null || value === undefined) {
@@ -38,12 +39,12 @@ export const teacherLoginSchema = z.object({
 });
 
 export const reservationActionSchema = z.object({
-  slotId: z.string().cuid("잘못된 슬롯 요청입니다."),
+  slotId: entityIdSchema,
   consultationType: z.enum(["PHONE", "IN_PERSON"]),
 });
 
 export const teacherSlotToggleSchema = z.object({
-  slotId: z.string().cuid("잘못된 슬롯 요청입니다."),
+  slotId: entityIdSchema,
 });
 
 export const teacherDateAvailabilitySchema = z.object({
@@ -61,5 +62,5 @@ export const teacherWeekConfigSchema = z.object({
 });
 
 export const teacherNotificationSchema = z.object({
-  notificationId: z.string().cuid("잘못된 알림 요청입니다."),
+  notificationId: entityIdSchema,
 });

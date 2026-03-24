@@ -1,6 +1,7 @@
-import { UserType } from "@prisma/client";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+
+import type { UserType } from "@/lib/db/types";
 
 export type AppSession = {
   userId: string;
@@ -59,5 +60,5 @@ export async function getSession() {
 }
 
 export function getSessionRedirectPath(session: AppSession) {
-  return session.userType === UserType.TEACHER ? "/teacher/dashboard" : "/dashboard";
+  return session.userType === "TEACHER" ? "/teacher/dashboard" : "/dashboard";
 }

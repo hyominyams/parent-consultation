@@ -1,16 +1,22 @@
 "use server";
 
-import { UserType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 
 import { ensureParentConsent, ensureTeacherConsent } from "@/lib/consent";
 import { setSession, clearSession } from "@/lib/auth/session";
 import { getTeacherDisplayName } from "@/lib/config/teachers";
+import { createId, nowIsoString } from "@/lib/db/helpers";
+import { getParentUserByLoginId, getReservationByParentUserId } from "@/lib/db/queries";
+import { supabaseAdmin } from "@/lib/db/supabase";
 import { ensureClassSchedule } from "@/lib/schedule";
-import { prisma } from "@/lib/db/prisma";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
-import { buildParentLoginId, buildFieldErrors, normalizePhone, toClassroomValue } from "@/lib/utils";
+import {
+  buildParentLoginId,
+  buildFieldErrors,
+  normalizePhone,
+  toClassroomValue,
+} from "@/lib/utils";
 import { parentAccessSchema, teacherLoginSchema } from "@/lib/validators";
 import type { ActionState } from "@/types/action-state";
 
@@ -36,12 +42,7 @@ export async function parentAccessAction(
     studentNumber: values.studentNumber,
   });
 
-  const existingParent = await prisma.parentUser.findUnique({
-    where: { loginId },
-    include: {
-      reservation: true,
-    },
-  });
+  const existingParent = await getParentUserByLoginId(loginId);
 
   if (!existingParent) {
     if (!values.privacyConsent || !values.thirdPartyConsent) {
@@ -51,8 +52,10 @@ export async function parentAccessAction(
       };
     }
 
-    const parent = await prisma.parentUser.create({
-      data: {
+    const { data: parent, error } = await supabaseAdmin
+      .from("ParentUser")
+      .insert({
+        id: createId(),
         loginId,
         grade: values.grade,
         classroom: normalizedClassroom === 0 ? null : normalizedClassroom,
@@ -61,14 +64,23 @@ export async function parentAccessAction(
         parentName: values.parentName,
         phone: values.phone,
         pinHash: await bcrypt.hash(values.pin, 10),
-      },
-    });
+        updatedAt: nowIsoString(),
+      })
+      .select("*")
+      .single();
+
+    if (error || !parent) {
+      return {
+        status: "error",
+        message: "학부모 계정 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      };
+    }
 
     await ensureParentConsent(parent.id, values);
     await ensureClassSchedule(parent.grade, normalizedClassroom);
     await setSession({
       userId: parent.id,
-      userType: UserType.PARENT,
+      userType: "PARENT",
       grade: parent.grade,
       classroom: normalizedClassroom,
       displayName: parent.parentName,
@@ -94,28 +106,37 @@ export async function parentAccessAction(
   }
 
   if (existingParent.phone !== values.phone) {
-    await prisma.parentUser.update({
-      where: {
-        id: existingParent.id,
-      },
-      data: {
+    const { error } = await supabaseAdmin
+      .from("ParentUser")
+      .update({
         phone: values.phone,
-      },
-    });
+        updatedAt: nowIsoString(),
+      })
+      .eq("id", existingParent.id);
+
+    if (error) {
+      return {
+        status: "error",
+        message: "연락처 업데이트 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+      };
+    }
   }
 
   await ensureParentConsent(existingParent.id, values);
   await ensureClassSchedule(existingParent.grade, toClassroomValue(existingParent.classroom));
+
+  const reservation = await getReservationByParentUserId(existingParent.id);
+
   await setSession({
     userId: existingParent.id,
-    userType: UserType.PARENT,
+    userType: "PARENT",
     grade: existingParent.grade,
     classroom: toClassroomValue(existingParent.classroom),
     displayName: existingParent.parentName,
     loginId: existingParent.loginId,
   });
 
-  redirect(existingParent.reservation ? "/dashboard" : "/reserve");
+  redirect(reservation ? "/dashboard" : "/reserve");
 }
 
 export async function teacherLoginAction(
@@ -158,7 +179,7 @@ export async function teacherLoginAction(
   await ensureClassSchedule(teacher.grade, teacher.classroom);
   await setSession({
     userId: teacher.id,
-    userType: UserType.TEACHER,
+    userType: "TEACHER",
     grade: teacher.grade,
     classroom: teacher.classroom,
     displayName: getTeacherDisplayName(teacher.teacherName),

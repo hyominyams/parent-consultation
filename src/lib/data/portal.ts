@@ -1,32 +1,36 @@
-import { SlotStatus } from "@prisma/client";
 import { eachDayOfInterval, format } from "date-fns";
 import { ko } from "date-fns/locale";
 
 import { CONSULTATION_WEEKS } from "@/lib/config/schedule";
 import { getTeacherDisplayName } from "@/lib/config/teachers";
-import { prisma } from "@/lib/db/prisma";
+import {
+  getClassScheduleConfigs,
+  getParentUserById,
+  getReservationByParentUserId,
+  getReservationsBySlotIds,
+  getReservationSlotById,
+  getReservationSlotsByClassroom,
+  getTeacherNotifications,
+  getTeacherUserById,
+} from "@/lib/db/queries";
+import type { ParentUserRow, ReservationRow, ReservationSlotRow } from "@/lib/db/types";
 import { ensureClassSchedule } from "@/lib/schedule";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
-import { formatGradeClassroom, formatPhoneNumber, maskStudentName, parseTimeLabel, toClassroomValue } from "@/lib/utils";
+import {
+  formatGradeClassroom,
+  formatPhoneNumber,
+  maskStudentName,
+  parseTimeLabel,
+  toClassroomValue,
+} from "@/lib/utils";
 
-type SlotWithReservation = Awaited<ReturnType<typeof getRawSlots>>[number];
+type ReservationWithParent = ReservationRow & {
+  parentUser: ParentUserRow | null;
+};
 
-async function getRawSlots(grade: number, classroom: number) {
-  return prisma.reservationSlot.findMany({
-    where: {
-      grade,
-      classroom,
-    },
-    include: {
-      reservation: {
-        include: {
-          parentUser: true,
-        },
-      },
-    },
-    orderBy: [{ date: "asc" }, { startDateTime: "asc" }],
-  });
-}
+type SlotWithReservation = ReservationSlotRow & {
+  reservation: ReservationWithParent | null;
+};
 
 function buildDayRange(week: (typeof CONSULTATION_WEEKS)[number]) {
   return eachDayOfInterval({
@@ -35,13 +39,40 @@ function buildDayRange(week: (typeof CONSULTATION_WEEKS)[number]) {
   });
 }
 
+async function getRawSlots(grade: number, classroom: number) {
+  const slots = await getReservationSlotsByClassroom(grade, classroom);
+  const reservations = await getReservationsBySlotIds(slots.map((slot) => slot.id));
+
+  const parentIds = Array.from(new Set(reservations.map((reservation) => reservation.parentUserId)));
+  const parents =
+    parentIds.length > 0
+      ? ((await Promise.all(parentIds.map((parentId) => getParentUserById(parentId)))).filter(Boolean) as ParentUserRow[])
+      : [];
+
+  const parentById = new Map(parents.map((parent) => [parent.id, parent]));
+  const reservationBySlotId = new Map(
+    reservations.map((reservation) => [
+      reservation.slotId,
+      {
+        ...reservation,
+        parentUser: parentById.get(reservation.parentUserId) ?? null,
+      },
+    ]),
+  );
+
+  return slots.map((slot) => ({
+    ...slot,
+    reservation: reservationBySlotId.get(slot.id) ?? null,
+  })) satisfies SlotWithReservation[];
+}
+
 function buildWeekCalendar(slots: SlotWithReservation[], mode: "parent" | "teacher") {
   return CONSULTATION_WEEKS.map((week) => {
     const weekSlots = slots.filter((slot) => slot.weekKey === week.weekKey);
     const days = buildDayRange(week).map((day) => {
       const dateKey = format(day, "yyyy-MM-dd");
       const daySlots = weekSlots
-        .filter((slot) => format(slot.date, "yyyy-MM-dd") === dateKey)
+        .filter((slot) => format(new Date(slot.date), "yyyy-MM-dd") === dateKey)
         .map((slot) => {
           const { startLabel, endLabel } = parseTimeLabel(slot.timeLabel);
           const reservation = slot.reservation;
@@ -54,14 +85,14 @@ function buildWeekCalendar(slots: SlotWithReservation[], mode: "parent" | "teach
             timeLabel: slot.timeLabel,
             dateKey,
             reservedStudentName:
-              reservation && mode === "teacher"
+              reservation?.parentUser && mode === "teacher"
                 ? reservation.parentUser.studentName
-                : reservation
+                : reservation?.parentUser
                   ? maskStudentName(reservation.parentUser.studentName)
                   : undefined,
-            reservedParentName: reservation?.parentUser.parentName,
+            reservedParentName: reservation?.parentUser?.parentName,
             reservedPhone:
-              mode === "teacher" && reservation
+              mode === "teacher" && reservation?.parentUser
                 ? formatPhoneNumber(reservation.parentUser.phone)
                 : undefined,
             reservedConsultationType: reservation?.consultationType,
@@ -101,11 +132,11 @@ function buildDailySummary(slots: SlotWithReservation[]) {
   >();
 
   for (const slot of slots) {
-    const dateKey = format(slot.date, "yyyy-MM-dd");
+    const dateKey = format(new Date(slot.date), "yyyy-MM-dd");
 
     if (!summary.has(dateKey)) {
       summary.set(dateKey, {
-        label: format(slot.date, "M/d (EEE)", { locale: ko }),
+        label: format(new Date(slot.date), "M/d (EEE)", { locale: ko }),
         total: 0,
         booked: 0,
         blocked: 0,
@@ -116,9 +147,9 @@ function buildDailySummary(slots: SlotWithReservation[]) {
     const item = summary.get(dateKey)!;
     item.total += 1;
 
-    if (slot.status === SlotStatus.BOOKED) {
+    if (slot.status === "BOOKED") {
       item.booked += 1;
-    } else if (slot.status === SlotStatus.BLOCKED) {
+    } else if (slot.status === "BLOCKED") {
       item.blocked += 1;
     } else {
       item.open += 1;
@@ -134,21 +165,14 @@ function buildDailySummary(slots: SlotWithReservation[]) {
 }
 
 export async function getParentCalendarData(parentUserId: string) {
-  const parent = await prisma.parentUser.findUnique({
-    where: { id: parentUserId },
-    include: {
-      reservation: {
-        include: {
-          slot: true,
-        },
-      },
-    },
-  });
+  const parent = await getParentUserById(parentUserId);
 
   if (!parent) {
     return null;
   }
 
+  const reservation = await getReservationByParentUserId(parent.id);
+  const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
   const classroom = toClassroomValue(parent.classroom);
   await ensureClassSchedule(parent.grade, classroom);
 
@@ -175,12 +199,12 @@ export async function getParentCalendarData(parentUserId: string) {
           name: getTeacherDisplayName(teacher.teacherName),
         }
       : null,
-    hasReservation: Boolean(parent.reservation),
-    reservation: parent.reservation
+    hasReservation: Boolean(reservation),
+    reservation: reservation && reservationSlot
       ? {
-          id: parent.reservation.id,
-          date: parent.reservation.slot.date,
-          timeLabel: parent.reservation.slot.timeLabel,
+          id: reservation.id,
+          date: new Date(reservationSlot.date),
+          timeLabel: reservationSlot.timeLabel,
         }
       : null,
     weeks: buildWeekCalendar(slots, "parent"),
@@ -188,23 +212,15 @@ export async function getParentCalendarData(parentUserId: string) {
 }
 
 export async function getParentDashboardData(parentUserId: string) {
-  const parent = await prisma.parentUser.findUnique({
-    where: { id: parentUserId },
-    include: {
-      reservation: {
-        include: {
-          slot: true,
-        },
-      },
-    },
-  });
+  const parent = await getParentUserById(parentUserId);
 
   if (!parent) {
     return null;
   }
 
+  const reservation = await getReservationByParentUserId(parent.id);
+  const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
   const classroom = toClassroomValue(parent.classroom);
-
   const teacher = await syncTeacherAccount({
     grade: parent.grade,
     classroom,
@@ -219,22 +235,20 @@ export async function getParentDashboardData(parentUserId: string) {
       classLabel: formatGradeClassroom(parent.grade, classroom),
     },
     teacher: getTeacherDisplayName(teacher?.teacherName),
-    reservation: parent.reservation
+    reservation: reservation && reservationSlot
       ? {
-          id: parent.reservation.id,
-          date: parent.reservation.slot.date,
-          timeLabel: parent.reservation.slot.timeLabel,
-          weekKey: parent.reservation.slot.weekKey,
-          consultationType: parent.reservation.consultationType,
+          id: reservation.id,
+          date: new Date(reservationSlot.date),
+          timeLabel: reservationSlot.timeLabel,
+          weekKey: reservationSlot.weekKey,
+          consultationType: reservation.consultationType,
         }
       : null,
   };
 }
 
 export async function getTeacherDashboardData(teacherUserId: string) {
-  const teacher = await prisma.teacherUser.findUnique({
-    where: { id: teacherUserId },
-  });
+  const teacher = await getTeacherUserById(teacherUserId);
 
   if (!teacher) {
     return null;
@@ -250,24 +264,8 @@ export async function getTeacherDashboardData(teacherUserId: string) {
 
   const [slots, configs, notifications] = await Promise.all([
     getRawSlots(teacher.grade, teacher.classroom),
-    prisma.classScheduleConfig.findMany({
-      where: {
-        grade: teacher.grade,
-        classroom: teacher.classroom,
-      },
-      orderBy: {
-        weekKey: "asc",
-      },
-    }),
-    prisma.teacherNotification.findMany({
-      where: {
-        teacherUserId: teacher.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 12,
-    }),
+    getClassScheduleConfigs(teacher.grade, teacher.classroom),
+    getTeacherNotifications(teacher.id, 12),
   ]);
 
   const unreadCount = notifications.filter((item) => !item.isRead).length;

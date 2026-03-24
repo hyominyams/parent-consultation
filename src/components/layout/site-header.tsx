@@ -5,7 +5,7 @@ import { logoutAction } from "@/lib/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getSession } from "@/lib/auth/session";
-import { prisma } from "@/lib/db/prisma";
+import { countTeacherUnreadNotifications } from "@/lib/db/queries";
 
 type SiteHeaderProps = {
   currentPath?: string;
@@ -19,12 +19,7 @@ export async function SiteHeader({ currentPath, teacherUnreadCount }: SiteHeader
   const unreadCount =
     session?.userType === "TEACHER"
       ? (teacherUnreadCount ??
-        (await prisma.teacherNotification.count({
-          where: {
-            teacherUserId: session.userId,
-            isRead: false,
-          },
-        })))
+        (await countTeacherUnreadNotifications(session.userId)))
       : 0;
 
   const links =

@@ -1,7 +1,7 @@
-import { UserType } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-import { prisma } from "@/lib/db/prisma";
+import { requireMaybeSingle } from "@/lib/db/helpers";
+import { supabaseAdmin } from "@/lib/db/supabase";
 import { getSession } from "@/lib/auth/session";
 
 export async function redirectAuthenticatedUser() {
@@ -11,15 +11,15 @@ export async function redirectAuthenticatedUser() {
     return;
   }
 
-  if (session.userType === UserType.TEACHER) {
-    const teacher = await prisma.teacherUser.findUnique({
-      where: {
-        id: session.userId,
-      },
-      select: {
-        id: true,
-      },
-    });
+  if (session.userType === "TEACHER") {
+    const teacher = requireMaybeSingle(
+      await supabaseAdmin
+        .from("TeacherUser")
+        .select("id")
+        .eq("id", session.userId)
+        .maybeSingle(),
+      "Failed to verify teacher session.",
+    );
 
     if (!teacher) {
       return;
@@ -28,24 +28,29 @@ export async function redirectAuthenticatedUser() {
     redirect("/teacher/dashboard");
   }
 
-  const parent = await prisma.parentUser.findUnique({
-    where: {
-      id: session.userId,
-    },
-    select: {
-      reservation: {
-        select: {
-          id: true,
-        },
-      },
-    },
-  });
+  const parent = requireMaybeSingle(
+    await supabaseAdmin
+      .from("ParentUser")
+      .select("id")
+      .eq("id", session.userId)
+      .maybeSingle(),
+    "Failed to verify parent session.",
+  );
 
   if (!parent) {
     return;
   }
 
-  redirect(parent.reservation ? "/dashboard" : "/reserve");
+  const { count, error } = await supabaseAdmin
+    .from("Reservation")
+    .select("id", { count: "exact", head: true })
+    .eq("parentUserId", session.userId);
+
+  if (error) {
+    throw new Error(`Failed to load reservation redirect state. ${error.message}`);
+  }
+
+  redirect(count ? "/dashboard" : "/reserve");
 }
 
 export async function requireParentSession() {
@@ -55,7 +60,7 @@ export async function requireParentSession() {
     redirect("/auth");
   }
 
-  if (session.userType === UserType.TEACHER) {
+  if (session.userType === "TEACHER") {
     redirect("/teacher/dashboard");
   }
 
@@ -69,7 +74,7 @@ export async function requireTeacherSession() {
     redirect("/auth?role=teacher");
   }
 
-  if (session.userType === UserType.PARENT) {
+  if (session.userType === "PARENT") {
     redirect("/dashboard");
   }
 

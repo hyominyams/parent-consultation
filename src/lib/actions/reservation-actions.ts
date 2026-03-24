@@ -1,15 +1,12 @@
 "use server";
 
-import { ConsultationType, Prisma, SlotStatus } from "@prisma/client";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
 import { revalidatePath } from "next/cache";
 
 import { requireParentSession } from "@/lib/auth/guards";
-import { prisma } from "@/lib/db/prisma";
-import { BLOCKED_SLOT_MESSAGE, TAKEN_SLOT_MESSAGE, getReservationBlockReason } from "@/lib/reservations";
+import { getParentUserById, getReservationByParentUserId } from "@/lib/db/queries";
+import { callRpc } from "@/lib/db/rpc";
+import { BLOCKED_SLOT_MESSAGE, TAKEN_SLOT_MESSAGE } from "@/lib/reservations";
 import { reservationActionSchema } from "@/lib/validators";
-import { toClassroomValue } from "@/lib/utils";
 import type { ActionState } from "@/types/action-state";
 
 function reservationErrorState(code: string): ActionState {
@@ -38,39 +35,9 @@ function reservationErrorState(code: string): ActionState {
   }
 }
 
-function getReservationPersistenceErrorCode(error: unknown): string | null {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
-    return null;
-  }
-
-  if (error.code === "P2034") {
-    return "TAKEN";
-  }
-
-  if (error.code !== "P2002") {
-    return null;
-  }
-
-  const target = Array.isArray(error.meta?.target)
-    ? error.meta.target
-    : typeof error.meta?.target === "string"
-      ? [error.meta.target]
-      : [];
-
-  if (target.includes("parentUserId")) {
-    return "ALREADY_RESERVED";
-  }
-
-  if (target.includes("slotId")) {
-    return "DUPLICATE_DATE";
-  }
-
-  return "TAKEN";
-}
-
 export async function bookReservationAction(
   slotId: string,
-  consultationType: "PHONE" | "IN_PERSON"
+  consultationType: "PHONE" | "IN_PERSON",
 ): Promise<ActionState> {
   const session = await requireParentSession();
   const parsed = reservationActionSchema.safeParse({ slotId, consultationType });
@@ -82,116 +49,24 @@ export async function bookReservationAction(
     };
   }
 
+  let resultCode: string;
+
   try {
-    await prisma.$transaction(
-      async (tx) => {
-        const parent = await tx.parentUser.findUnique({
-          where: {
-            id: session.userId,
-          },
-          include: {
-            reservation: true,
-          },
-        });
-
-        if (!parent) {
-          throw new Error("NOT_FOUND");
-        }
-
-        const classroom = toClassroomValue(parent.classroom);
-        const slot = await tx.reservationSlot.findUnique({
-          where: {
-            id: parsed.data.slotId,
-          },
-          include: {
-            reservation: true,
-          },
-        });
-
-        if (!slot || slot.grade !== parent.grade || slot.classroom !== classroom) {
-          throw new Error("NOT_ALLOWED");
-        }
-
-        const blockReason = getReservationBlockReason({
-          hasExistingReservation: Boolean(parent.reservation),
-          slotStatus: slot.status,
-          hasSlotReservation: Boolean(slot.reservation),
-        });
-
-        if (blockReason) {
-          throw new Error(blockReason);
-        }
-
-        const overlappingReservation = await tx.reservation.findFirst({
-          where: {
-            slot: {
-              grade: slot.grade,
-              classroom: slot.classroom,
-              startDateTime: slot.startDateTime,
-            },
-          },
-          select: {
-            id: true,
-          },
-        });
-
-        if (overlappingReservation) {
-          throw new Error("DUPLICATE_DATE");
-        }
-
-        const reservation = await tx.reservation.create({
-          data: {
-            parentUserId: parent.id,
-            slotId: slot.id,
-            consultationType: parsed.data.consultationType as ConsultationType,
-          },
-        });
-
-        await tx.reservationSlot.update({
-          where: {
-            id: slot.id,
-          },
-          data: {
-            status: SlotStatus.BOOKED,
-          },
-        });
-
-        const teacher = await tx.teacherUser.findUnique({
-          where: {
-            grade_classroom: {
-              grade: slot.grade,
-              classroom: slot.classroom,
-            },
-          },
-        });
-
-        if (teacher) {
-          await tx.teacherNotification.create({
-            data: {
-              teacherUserId: teacher.id,
-              reservationId: reservation.id,
-              title: "새 상담 신청",
-              message: `${parent.studentName} 학생이 ${format(slot.startDateTime, "M월 d일 HH:mm", {
-                locale: ko,
-              })} 상담을 신청했습니다.`,
-            },
-          });
-        }
+    resultCode = await callRpc(
+      "app_book_reservation",
+      {
+        p_parent_user_id: session.userId,
+        p_slot_id: parsed.data.slotId,
+        p_consultation_type: parsed.data.consultationType,
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      "Failed to book reservation.",
     );
-  } catch (error) {
-    const persistenceErrorCode = getReservationPersistenceErrorCode(error);
-
-    if (persistenceErrorCode) {
-      return reservationErrorState(persistenceErrorCode);
-    }
-
-    if (error instanceof Error) {
-      return reservationErrorState(error.message);
-    }
-
+  } catch {
     return reservationErrorState("UNKNOWN");
+  }
+
+  if (resultCode !== "SUCCESS") {
+    return reservationErrorState(resultCode);
   }
 
   revalidatePath("/reserve");
@@ -211,67 +86,48 @@ export async function deleteReservationAction(
   intent: "delete" | "reschedule" = "delete",
 ): Promise<ActionState> {
   const session = await requireParentSession();
+  const parent = await getParentUserById(session.userId);
 
-  const parent = await prisma.parentUser.findUnique({
-    where: {
-      id: session.userId,
-    },
-    include: {
-      reservation: {
-        include: {
-          slot: true,
-        },
-      },
-    },
-  });
-
-  if (!parent?.reservation) {
+  if (!parent) {
     return {
       status: "error",
       message: "삭제할 예약이 없습니다.",
     };
   }
 
-  const reservation = parent.reservation;
+  const reservation = await getReservationByParentUserId(parent.id);
 
-  await prisma.$transaction(async (tx) => {
-    await tx.reservation.delete({
-      where: {
-        id: reservation.id,
-      },
-    });
+  if (!reservation) {
+    return {
+      status: "error",
+      message: "삭제할 예약이 없습니다.",
+    };
+  }
 
-    await tx.reservationSlot.update({
-      where: {
-        id: reservation.slotId,
-      },
-      data: {
-        status: SlotStatus.OPEN,
-      },
-    });
+  let resultCode: string;
 
-    const teacher = await tx.teacherUser.findUnique({
-      where: {
-        grade_classroom: {
-          grade: reservation.slot.grade,
-          classroom: reservation.slot.classroom,
-        },
+  try {
+    resultCode = await callRpc(
+      "app_delete_reservation",
+      {
+        p_parent_user_id: session.userId,
+        p_intent: intent,
       },
-    });
+      "Failed to delete reservation.",
+    );
+  } catch {
+    return {
+      status: "error",
+      message: "예약 삭제 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    };
+  }
 
-    if (teacher) {
-      await tx.teacherNotification.create({
-        data: {
-          teacherUserId: teacher.id,
-          title: intent === "reschedule" ? "예약 변경 요청" : "예약 취소",
-          message:
-            intent === "reschedule"
-              ? `${parent.studentName} 학생이 기존 예약을 취소하고 새 시간을 선택하려고 합니다.`
-              : `${parent.studentName} 학생의 상담 예약이 취소되었습니다.`,
-        },
-      });
-    }
-  });
+  if (resultCode !== "SUCCESS") {
+    return {
+      status: "error",
+      message: "예약 삭제 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    };
+  }
 
   revalidatePath("/reserve");
   revalidatePath("/dashboard");

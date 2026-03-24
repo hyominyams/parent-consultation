@@ -1,4 +1,5 @@
-import { prisma } from "@/lib/db/prisma";
+import { createId } from "@/lib/db/helpers";
+import { supabaseAdmin } from "@/lib/db/supabase";
 
 export async function createTeacherNotification(input: {
   teacherUserId: string;
@@ -6,12 +7,21 @@ export async function createTeacherNotification(input: {
   message: string;
   reservationId?: string;
 }) {
-  return prisma.teacherNotification.create({
-    data: {
+  const { data, error } = await supabaseAdmin
+    .from("TeacherNotification")
+    .insert({
+      id: createId(),
       teacherUserId: input.teacherUserId,
-      reservationId: input.reservationId,
+      reservationId: input.reservationId ?? null,
       title: input.title,
       message: input.message,
-    },
-  });
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create teacher notification. ${error.message}`);
+  }
+
+  return data;
 }

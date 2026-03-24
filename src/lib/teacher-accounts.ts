@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
 
+import { createId, nowIsoString, requireMaybeSingle } from "@/lib/db/helpers";
+import { supabaseAdmin } from "@/lib/db/supabase";
+import type { TeacherUserRow } from "@/lib/db/types";
 import { buildTeacherPassword, getConfiguredTeacherName } from "@/lib/config/teachers";
-import { prisma } from "@/lib/db/prisma";
 
 type SyncTeacherAccountInput = {
   grade: number;
@@ -19,24 +21,35 @@ export async function syncTeacherAccount(
   const teacherName = getConfiguredTeacherName(input.grade, input.classroom);
   const expectedPassword = buildTeacherPassword(input);
 
-  const existingTeacher = await prisma.teacherUser.findUnique({
-    where: {
-      grade_classroom: {
-        grade: input.grade,
-        classroom: input.classroom,
-      },
-    },
-  });
+  const existingTeacher = requireMaybeSingle<TeacherUserRow>(
+    await supabaseAdmin
+      .from("TeacherUser")
+      .select("*")
+      .eq("grade", input.grade)
+      .eq("classroom", input.classroom)
+      .maybeSingle(),
+    "Failed to load teacher account.",
+  );
 
   if (!existingTeacher) {
-    return prisma.teacherUser.create({
-      data: {
+    const { data, error } = await supabaseAdmin
+      .from("TeacherUser")
+      .insert({
+        id: createId(),
         grade: input.grade,
         classroom: input.classroom,
         teacherName,
         passwordHash: await bcrypt.hash(expectedPassword, 10),
-      },
-    });
+        updatedAt: nowIsoString(),
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to create teacher account. ${error.message}`);
+    }
+
+    return data as TeacherUserRow;
   }
 
   const shouldSyncPassword =
@@ -48,15 +61,22 @@ export async function syncTeacherAccount(
     return existingTeacher;
   }
 
-  return prisma.teacherUser.update({
-    where: {
-      id: existingTeacher.id,
-    },
-    data: {
+  const { data, error } = await supabaseAdmin
+    .from("TeacherUser")
+    .update({
       teacherName,
       ...(shouldSyncPassword
         ? { passwordHash: await bcrypt.hash(expectedPassword, 10) }
         : undefined),
-    },
-  });
+      updatedAt: nowIsoString(),
+    })
+    .eq("id", existingTeacher.id)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update teacher account. ${error.message}`);
+  }
+
+  return data as TeacherUserRow;
 }
