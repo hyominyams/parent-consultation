@@ -11,6 +11,16 @@ import type { ActionState } from "@/types/action-state";
 
 function reservationErrorState(code: string): ActionState {
   switch (code) {
+    case "NOT_FOUND":
+      return {
+        status: "error",
+        message: "예약 대상 정보를 찾을 수 없습니다. 다시 로그인한 뒤 시도해주세요.",
+      };
+    case "NOT_ALLOWED":
+      return {
+        status: "error",
+        message: "선택한 슬롯에 접근할 수 없습니다. 화면을 새로고침한 뒤 다시 선택해주세요.",
+      };
     case "ALREADY_RESERVED":
       return {
         status: "error",
@@ -61,7 +71,13 @@ export async function bookReservationAction(
       },
       "Failed to book reservation.",
     );
-  } catch {
+  } catch (error) {
+    console.error("bookReservationAction failed", {
+      parentUserId: session.userId,
+      slotId: parsed.data.slotId,
+      consultationType: parsed.data.consultationType,
+      error,
+    });
     return reservationErrorState("UNKNOWN");
   }
 
@@ -115,7 +131,12 @@ export async function deleteReservationAction(
       },
       "Failed to delete reservation.",
     );
-  } catch {
+  } catch (error) {
+    console.error("deleteReservationAction failed", {
+      parentUserId: session.userId,
+      intent,
+      error,
+    });
     return {
       status: "error",
       message: "예약 삭제 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",

@@ -9,7 +9,7 @@ import { getTeacherDisplayName } from "@/lib/config/teachers";
 import { createId, nowIsoString } from "@/lib/db/helpers";
 import { getParentUserByLoginId, getReservationByParentUserId } from "@/lib/db/queries";
 import { supabaseAdmin } from "@/lib/db/supabase";
-import { ensureClassSchedule } from "@/lib/schedule";
+import { ensureClassScheduleReady } from "@/lib/schedule";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
 import {
   buildParentLoginId,
@@ -77,7 +77,7 @@ export async function parentAccessAction(
     }
 
     await ensureParentConsent(parent.id, values);
-    await ensureClassSchedule(parent.grade, normalizedClassroom);
+    await ensureClassScheduleReady(parent.grade, normalizedClassroom);
     await setSession({
       userId: parent.id,
       userType: "PARENT",
@@ -123,7 +123,7 @@ export async function parentAccessAction(
   }
 
   await ensureParentConsent(existingParent.id, values);
-  await ensureClassSchedule(existingParent.grade, toClassroomValue(existingParent.classroom));
+  await ensureClassScheduleReady(existingParent.grade, toClassroomValue(existingParent.classroom));
 
   const reservation = await getReservationByParentUserId(existingParent.id);
 
@@ -176,7 +176,7 @@ export async function teacherLoginAction(
   }
 
   await ensureTeacherConsent(teacher.id, values);
-  await ensureClassSchedule(teacher.grade, teacher.classroom);
+  await ensureClassScheduleReady(teacher.grade, teacher.classroom);
   await setSession({
     userId: teacher.id,
     userType: "TEACHER",

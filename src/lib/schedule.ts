@@ -4,6 +4,13 @@ import { supabaseAdmin } from "@/lib/db/supabase";
 import type { ClassScheduleConfigRow } from "@/lib/db/types";
 import { buildWeekdayDateKeys, combineKstDateTime, generateTimeBlocks, shiftDateKey } from "@/lib/utils";
 
+const SCHEDULE_READY_TTL_MS = 5 * 60 * 1000;
+
+declare global {
+  var scheduleReadyTimestamps: Map<string, number> | undefined;
+  var scheduleReadyInFlight: Map<string, Promise<void>> | undefined;
+}
+
 export function buildSlotPayload(input: {
   grade: number;
   classroom: number;
@@ -34,6 +41,122 @@ export function buildSlotPayload(input: {
       updatedAt: nowIsoString(),
     })),
   );
+}
+
+function getScheduleCacheKey(grade: number, classroom: number) {
+  return `${grade}:${classroom}`;
+}
+
+function isUniqueViolation(error: { code?: string } | null | undefined) {
+  return error?.code === "23505";
+}
+
+function getScheduleReadyTimestamps() {
+  if (!global.scheduleReadyTimestamps) {
+    global.scheduleReadyTimestamps = new Map<string, number>();
+  }
+
+  return global.scheduleReadyTimestamps;
+}
+
+function getScheduleReadyInFlight() {
+  if (!global.scheduleReadyInFlight) {
+    global.scheduleReadyInFlight = new Map<string, Promise<void>>();
+  }
+
+  return global.scheduleReadyInFlight;
+}
+
+async function hasExpectedWeekSlots(input: {
+  grade: number;
+  classroom: number;
+  weekKey: string;
+  slotPayload: ReturnType<typeof buildSlotPayload>;
+}) {
+  const existingSlotsResult = await supabaseAdmin
+    .from("ReservationSlot")
+    .select("date, timeLabel, startDateTime, endDateTime")
+    .eq("grade", input.grade)
+    .eq("classroom", input.classroom)
+    .eq("weekKey", input.weekKey)
+    .order("startDateTime", { ascending: true });
+
+  if (existingSlotsResult.error) {
+    throw new Error(`Failed to verify reservation slots. ${existingSlotsResult.error.message}`);
+  }
+
+  const existingSlots = existingSlotsResult.data ?? [];
+  const slotPayloadByTime = [...input.slotPayload].sort((a, b) =>
+    a.startDateTime.localeCompare(b.startDateTime),
+  );
+
+  return (
+    existingSlots.length === slotPayloadByTime.length &&
+    existingSlots.every((slot, index) => {
+      const targetSlot = slotPayloadByTime[index];
+
+      return (
+        slot.date === targetSlot.date &&
+        slot.timeLabel === targetSlot.timeLabel &&
+        slot.startDateTime === targetSlot.startDateTime &&
+        slot.endDateTime === targetSlot.endDateTime
+      );
+    })
+  );
+}
+
+async function isClassScheduleReady(grade: number, classroom: number) {
+  const configs =
+    (requireData(
+      await supabaseAdmin
+        .from("ClassScheduleConfig")
+        .select("weekKey, slotIntervalMinutes, startTime, endTime")
+        .eq("grade", grade)
+        .eq("classroom", classroom),
+      "Failed to load class schedule readiness.",
+    ) ?? []) as Array<
+      Pick<ClassScheduleConfigRow, "weekKey" | "slotIntervalMinutes" | "startTime" | "endTime">
+    >;
+
+  if (configs.length !== CONSULTATION_WEEK_KEYS.length) {
+    return false;
+  }
+
+  const configByWeekKey = new Map(configs.map((config) => [config.weekKey, config]));
+
+  if (CONSULTATION_WEEK_KEYS.some((weekKey) => !configByWeekKey.has(weekKey))) {
+    return false;
+  }
+
+  const expectedSlotCount = CONSULTATION_WEEKS.reduce((total, week) => {
+    const config = configByWeekKey.get(week.weekKey);
+
+    if (!config) {
+      return total;
+    }
+
+    return (
+      total +
+      buildWeekdayDateKeys(week.startDate, week.endDate).length *
+        generateTimeBlocks({
+          startTime: config.startTime,
+          endTime: config.endTime,
+          slotIntervalMinutes: config.slotIntervalMinutes,
+        }).length
+    );
+  }, 0);
+
+  const { count, error } = await supabaseAdmin
+    .from("ReservationSlot")
+    .select("id", { count: "exact", head: true })
+    .eq("grade", grade)
+    .eq("classroom", classroom);
+
+  if (error) {
+    throw new Error(`Failed to count reservation slots. ${error.message}`);
+  }
+
+  return (count ?? 0) === expectedSlotCount;
 }
 
 async function updateSlotTiming(
@@ -123,10 +246,29 @@ async function ensureWeekSchedule(input: {
       .single();
 
     if (error) {
-      throw new Error(`Failed to create class schedule config. ${error.message}`);
+      if (isUniqueViolation(error)) {
+        config = requireMaybeSingle<ClassScheduleConfigRow>(
+          await supabaseAdmin
+            .from("ClassScheduleConfig")
+            .select("*")
+            .eq("grade", input.grade)
+            .eq("classroom", input.classroom)
+            .eq("weekKey", input.weekKey)
+            .maybeSingle(),
+          "Failed to reload class schedule config.",
+        );
+      } else {
+        throw new Error(`Failed to create class schedule config. ${error.message}`);
+      }
     }
 
-    config = data as ClassScheduleConfigRow;
+    if (!config && data) {
+      config = data as ClassScheduleConfigRow;
+    }
+  }
+
+  if (!config) {
+    throw new Error("Failed to resolve class schedule config.");
   }
 
   const slotPayload = buildSlotPayload({
@@ -199,6 +341,19 @@ async function ensureWeekSchedule(input: {
     const { error: insertError } = await supabaseAdmin.from("ReservationSlot").insert(slotPayload);
 
     if (insertError) {
+      if (isUniqueViolation(insertError)) {
+        const matches = await hasExpectedWeekSlots({
+          grade: input.grade,
+          classroom: input.classroom,
+          weekKey: input.weekKey,
+          slotPayload: slotPayloadByTime,
+        });
+
+        if (matches) {
+          return;
+        }
+      }
+
       throw new Error(`Failed to insert reservation slots. ${insertError.message}`);
     }
 
@@ -275,15 +430,55 @@ async function removeObsoleteWeekSchedules(grade: number, classroom: number) {
 export async function ensureClassSchedule(grade: number, classroom: number) {
   await removeObsoleteWeekSchedules(grade, classroom);
 
-  for (const week of CONSULTATION_WEEKS) {
-    await ensureWeekSchedule({
-      grade,
-      classroom,
-      weekKey: week.weekKey,
-      startDate: week.startDate,
-      endDate: week.endDate,
-    });
+  await Promise.all(
+    CONSULTATION_WEEKS.map((week) =>
+      ensureWeekSchedule({
+        grade,
+        classroom,
+        weekKey: week.weekKey,
+        startDate: week.startDate,
+        endDate: week.endDate,
+      }),
+    ),
+  );
+}
+
+export async function ensureClassScheduleReady(
+  grade: number,
+  classroom: number,
+  options: {
+    force?: boolean;
+  } = {},
+) {
+  const cacheKey = getScheduleCacheKey(grade, classroom);
+  const timestamps = getScheduleReadyTimestamps();
+  const inFlight = getScheduleReadyInFlight();
+  const now = Date.now();
+  const cachedAt = timestamps.get(cacheKey);
+
+  if (!options.force && cachedAt && now - cachedAt < SCHEDULE_READY_TTL_MS) {
+    return;
   }
+
+  const existingTask = inFlight.get(cacheKey);
+
+  if (existingTask) {
+    await existingTask;
+    return;
+  }
+
+  const task = (async () => {
+    if (options.force || !(await isClassScheduleReady(grade, classroom))) {
+      await ensureClassSchedule(grade, classroom);
+    }
+
+    timestamps.set(cacheKey, Date.now());
+  })().finally(() => {
+    inFlight.delete(cacheKey);
+  });
+
+  inFlight.set(cacheKey, task);
+  await task;
 }
 
 export async function rebuildWeekSlots(input: {

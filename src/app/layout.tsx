@@ -36,6 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
+      data-scroll-behavior="smooth"
       className={`${displayFont.variable} ${bodyFont.variable} ${logoFont.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-[color:var(--background)] font-body text-[color:var(--foreground)] selection:bg-[#d9e6d8] selection:text-[#49554a]">

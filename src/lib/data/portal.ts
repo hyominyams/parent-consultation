@@ -13,7 +13,7 @@ import {
   getTeacherUserById,
 } from "@/lib/db/queries";
 import type { ParentUserRow, ReservationRow, ReservationSlotRow } from "@/lib/db/types";
-import { ensureClassSchedule } from "@/lib/schedule";
+import { ensureClassScheduleReady } from "@/lib/schedule";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
 import {
   buildWeekdayDateKeys,
@@ -274,7 +274,7 @@ export async function getParentCalendarData(parentUserId: string) {
   }
 
   const classroom = toClassroomValue(parent.classroom);
-  await ensureClassSchedule(parent.grade, classroom);
+  await ensureClassScheduleReady(parent.grade, classroom);
   const reservation = await getReservationByParentUserId(parent.id);
   const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
 
@@ -321,7 +321,7 @@ export async function getParentDashboardData(parentUserId: string) {
   }
 
   const classroom = toClassroomValue(parent.classroom);
-  await ensureClassSchedule(parent.grade, classroom);
+  await ensureClassScheduleReady(parent.grade, classroom);
   const reservation = await getReservationByParentUserId(parent.id);
   const reservationSlot = reservation ? await getReservationSlotById(reservation.slotId) : null;
   const teacher = await syncTeacherAccount({
@@ -357,7 +357,7 @@ export async function getTeacherDashboardData(teacherUserId: string) {
     return null;
   }
 
-  await ensureClassSchedule(context.grade, context.classroom);
+  await ensureClassScheduleReady(context.grade, context.classroom);
   const [slots, notifications] = await Promise.all([
     getReservationSlotsByClassroom(context.grade, context.classroom),
     getTeacherNotifications(context.teacherUserId, 12),
@@ -383,7 +383,7 @@ export async function getTeacherSettingsData(teacherUserId: string) {
     return null;
   }
 
-  await ensureClassSchedule(context.grade, context.classroom);
+  await ensureClassScheduleReady(context.grade, context.classroom);
 
   const [configs, slots] = await Promise.all([
     getClassScheduleConfigs(context.grade, context.classroom),
@@ -423,7 +423,7 @@ export async function getTeacherAvailabilityData(teacherUserId: string) {
     return null;
   }
 
-  await ensureClassSchedule(context.grade, context.classroom);
+  await ensureClassScheduleReady(context.grade, context.classroom);
   const slots = await getRawSlots(context.grade, context.classroom);
 
   return {

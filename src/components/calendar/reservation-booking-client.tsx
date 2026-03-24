@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition } from "react";
 import {
   ArrowRight,
   CalendarDays,
@@ -30,6 +30,13 @@ type ReservationDay = ReservationWeek["days"][number];
 type ReservationSlot = ReservationDay["slots"][number];
 type SelectedReservationSlot = ReservationSlot & { fullLabel: string };
 type ConsultationType = "PHONE" | "IN_PERSON";
+type SlotSyncResponse = {
+  hasReservation: boolean;
+  slots: Array<{
+    id: string;
+    status: ReservationSlot["status"];
+  }>;
+};
 
 const CTA_WHEEL_MAX_OFFSET = 36;
 const CTA_WHEEL_MAX_VELOCITY = 6;
@@ -50,6 +57,52 @@ function isUnavailableSlot(slot: ReservationSlot) {
 
 function getOpenCount(day: ReservationDay) {
   return day.slots.filter((slot) => !isUnavailableSlot(slot)).length;
+}
+
+function mergeWeekSlotStatuses(currentWeeks: ReservationWeek[], syncedSlots: SlotSyncResponse["slots"]) {
+  const statusById = new Map(syncedSlots.map((slot) => [slot.id, slot.status]));
+  let hasChanges = false;
+
+  const nextWeeks = currentWeeks.map((week) => {
+    let weekChanged = false;
+
+    const nextDays = week.days.map((day) => {
+      let dayChanged = false;
+
+      const nextSlots = day.slots.map((slot) => {
+        const nextStatus = statusById.get(slot.id);
+
+        if (!nextStatus || nextStatus === slot.status) {
+          return slot;
+        }
+
+        hasChanges = true;
+        dayChanged = true;
+        weekChanged = true;
+
+        return {
+          ...slot,
+          status: nextStatus,
+        };
+      });
+
+      return dayChanged
+        ? {
+            ...day,
+            slots: nextSlots,
+          }
+        : day;
+    });
+
+    return weekChanged
+      ? {
+          ...week,
+          days: nextDays,
+        }
+      : week;
+  });
+
+  return hasChanges ? nextWeeks : currentWeeks;
 }
 
 function useWheelReactiveCtaMotion(enabled: boolean) {
@@ -140,6 +193,9 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   const unavailableSelectionToastRef = useRef<string | null>(null);
   const submittingSlotIdRef = useRef<string | null>(null);
   const successRedirectPendingRef = useRef(false);
+  const syncInFlightRef = useRef(false);
+  const [weeks, setWeeks] = useState(data.weeks);
+  const [hasReservation, setHasReservation] = useState(data.hasReservation);
   const [selectedWeekKey, setSelectedWeekKey] = useState(data.weeks[0]?.weekKey ?? "");
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [consultationType, setConsultationType] = useState<ConsultationType>("IN_PERSON");
@@ -151,8 +207,17 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
+    router.prefetch("/dashboard");
+  }, [router]);
+
+  useEffect(() => {
+    setWeeks(data.weeks);
+    setHasReservation(data.hasReservation);
+  }, [data.hasReservation, data.weeks]);
+
+  useEffect(() => {
     if (
-      !data.hasReservation ||
+      !hasReservation ||
       successModalOpen ||
       successRedirectPendingRef.current ||
       submittingSlotIdRef.current
@@ -161,7 +226,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
     }
 
     router.replace("/dashboard");
-  }, [data.hasReservation, router, successModalOpen]);
+  }, [hasReservation, router, successModalOpen]);
 
   useEffect(() => {
     if (!successModalOpen) {
@@ -183,7 +248,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
       submittingSlotIdRef.current = null;
       successRedirectPendingRef.current = false;
       setSuccessModalOpen(false);
-      router.push(successRedirectTo);
+      router.replace(successRedirectTo);
     }, SUCCESS_REDIRECT_DELAY_MS);
 
     return () => {
@@ -192,14 +257,18 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
     };
   }, [router, successModalOpen, successRedirectTo]);
 
+  useEffect(() => {
+    router.prefetch(successRedirectTo);
+  }, [router, successRedirectTo]);
+
   const selectedWeekIndex = Math.max(
-    data.weeks.findIndex((week) => week.weekKey === selectedWeekKey),
+    weeks.findIndex((week) => week.weekKey === selectedWeekKey),
     0,
   );
 
   const selectedWeek = useMemo(
-    () => data.weeks.find((week) => week.weekKey === selectedWeekKey) ?? data.weeks[0],
-    [data.weeks, selectedWeekKey],
+    () => weeks.find((week) => week.weekKey === selectedWeekKey) ?? weeks[0],
+    [selectedWeekKey, weeks],
   );
 
   const selectedSlot = useMemo<SelectedReservationSlot | null>(() => {
@@ -224,24 +293,62 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
       ? expandedDayKey
       : fallbackDayKey);
 
+  const syncSlotStatuses = useEffectEvent(async () => {
+    if (
+      syncInFlightRef.current ||
+      pending ||
+      successModalOpen ||
+      successRedirectPendingRef.current ||
+      submittingSlotIdRef.current ||
+      typeof document === "undefined" ||
+      document.visibilityState !== "visible"
+    ) {
+      return;
+    }
+
+    syncInFlightRef.current = true;
+
+    try {
+      const response = await fetch("/api/reservation-slots", {
+        method: "GET",
+        cache: "no-store",
+        headers: {
+          accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        return;
+      }
+
+      const result = (await response.json()) as SlotSyncResponse;
+      setHasReservation(result.hasReservation);
+      setWeeks((currentWeeks) => mergeWeekSlotStatuses(currentWeeks, result.slots));
+    } catch (error) {
+      console.error("Failed to sync reservation slots", error);
+    } finally {
+      syncInFlightRef.current = false;
+    }
+  });
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    const refreshSlots = () => {
-      if (pending || successModalOpen || successRedirectPendingRef.current || document.visibilityState !== "visible") {
-        return;
-      }
-
-      router.refresh();
+    const runSync = () => {
+      void syncSlotStatuses();
     };
 
-    const intervalId = window.setInterval(refreshSlots, SLOT_SYNC_INTERVAL_MS);
-    const handleFocus = () => refreshSlots();
+    runSync();
+
+    const intervalId = window.setInterval(runSync, SLOT_SYNC_INTERVAL_MS);
+    const handleFocus = () => {
+      runSync();
+    };
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        refreshSlots();
+        runSync();
       }
     };
 
@@ -253,13 +360,13 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [pending, router, successModalOpen]);
+  }, []);
 
   useEffect(() => {
     const suppressUnavailableToast =
       successModalOpen ||
       successRedirectPendingRef.current ||
-      data.hasReservation ||
+      hasReservation ||
       submittingSlotIdRef.current === selectedSlot?.id;
 
     if (!selectedSlot || suppressUnavailableToast || !selectedSlotUnavailable) {
@@ -273,10 +380,16 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
 
     unavailableSelectionToastRef.current = selectedSlot.id;
     toast.error(selectedSlot.status === "BLOCKED" ? BLOCKED_SLOT_MESSAGE : TAKEN_SLOT_MESSAGE);
-  }, [data.hasReservation, selectedSlot, selectedSlotUnavailable, successModalOpen]);
+  }, [hasReservation, selectedSlot, selectedSlotUnavailable, successModalOpen]);
 
   async function handleBook() {
-    if (!selectedSlot || selectedSlotUnavailable) {
+    if (
+      !selectedSlot ||
+      selectedSlotUnavailable ||
+      pending ||
+      submittingSlotIdRef.current ||
+      successRedirectPendingRef.current
+    ) {
       return;
     }
 
@@ -305,7 +418,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
     submittingSlotIdRef.current = null;
     successRedirectPendingRef.current = false;
     setSuccessModalOpen(false);
-    router.push(successRedirectTo);
+    router.replace(successRedirectTo);
   }
 
   function clearSelection() {
@@ -313,11 +426,11 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
   }
 
   function changeWeek(direction: "next" | "prev") {
-    if (direction === "next" && selectedWeekIndex < data.weeks.length - 1) {
-      setSelectedWeekKey(data.weeks[selectedWeekIndex + 1].weekKey);
+    if (direction === "next" && selectedWeekIndex < weeks.length - 1) {
+      setSelectedWeekKey(weeks[selectedWeekIndex + 1].weekKey);
       setSelectedSlotId(null);
     } else if (direction === "prev" && selectedWeekIndex > 0) {
-      setSelectedWeekKey(data.weeks[selectedWeekIndex - 1].weekKey);
+      setSelectedWeekKey(weeks[selectedWeekIndex - 1].weekKey);
       setSelectedSlotId(null);
     }
   }
@@ -360,7 +473,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
             <button
               onClick={() => changeWeek("next")}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm transition-colors hover:bg-primary-container disabled:opacity-30 disabled:hover:bg-white"
-              disabled={selectedWeekIndex === data.weeks.length - 1}
+              disabled={selectedWeekIndex === weeks.length - 1}
             >
               <ChevronRight className="h-5 w-5 text-text-strong" />
             </button>
@@ -368,7 +481,7 @@ export function ReservationBookingClient({ data }: ReservationBookingClientProps
 
           <div className="flex justify-center overflow-x-auto">
             <div className="flex min-w-max rounded-xl border border-surface-container-highest/30 bg-white/50 p-1">
-              {data.weeks.map((week) => (
+              {weeks.map((week) => (
                 <button
                   key={week.weekKey}
                   onClick={() => {

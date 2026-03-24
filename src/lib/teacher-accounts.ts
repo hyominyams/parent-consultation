@@ -14,6 +14,10 @@ type SyncTeacherAccountOptions = {
   syncPassword?: boolean;
 };
 
+function isUniqueViolation(error: { code?: string } | null | undefined) {
+  return error?.code === "23505";
+}
+
 export async function syncTeacherAccount(
   input: SyncTeacherAccountInput,
   options: SyncTeacherAccountOptions = {},
@@ -46,6 +50,18 @@ export async function syncTeacherAccount(
       .single();
 
     if (error) {
+      if (isUniqueViolation(error)) {
+        return requireMaybeSingle<TeacherUserRow>(
+          await supabaseAdmin
+            .from("TeacherUser")
+            .select("*")
+            .eq("grade", input.grade)
+            .eq("classroom", input.classroom)
+            .maybeSingle(),
+          "Failed to reload teacher account.",
+        );
+      }
+
       throw new Error(`Failed to create teacher account. ${error.message}`);
     }
 
