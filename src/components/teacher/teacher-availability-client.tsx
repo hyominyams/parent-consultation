@@ -33,7 +33,6 @@ function getDayStats(day: DayItem) {
     bookedCount: bookedSlots.length,
     modifiableCount: openSlots.length + blockedSlots.length,
     bookedTimes: bookedSlots.map((slot) => `${slot.startLabel}-${slot.endLabel}`),
-    totalCount: day.slots.length,
   };
 }
 
@@ -257,19 +256,6 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                     );
                   })}
                 </div>
-
-                <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    예약 {stats.bookedCount}
-                  </span>
-                  <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    가능 {stats.openCount}
-                  </span>
-                  <span className="rounded-full bg-[color:var(--surface-container-low)] px-3 py-2 text-[color:var(--text-soft)]">
-                    불가 {stats.blockedCount}
-                  </span>
-                </div>
-
                 <div className="mt-4 border-t border-[color:var(--surface-container-high)] pt-4">
                   <p className="text-sm leading-6 text-[color:var(--text-soft)]">
                     {stats.bookedTimes.length > 0

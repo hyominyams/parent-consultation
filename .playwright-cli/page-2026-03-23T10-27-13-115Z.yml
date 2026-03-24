@@ -1,0 +1,116 @@
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - link "Sinwol Elementary" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: Sinwol
+        - generic [ref=e8]: Elementary
+      - generic [ref=e10]:
+        - link "소개" [ref=e11] [cursor=pointer]:
+          - /url: /
+          - img [ref=e12]
+          - text: 소개
+        - link "예약" [ref=e14] [cursor=pointer]:
+          - /url: /reserve
+          - img [ref=e15]
+          - text: 예약
+        - link "내 신청" [ref=e17] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e18]
+          - text: 내 신청
+      - link "로그인" [ref=e22] [cursor=pointer]:
+        - /url: /auth
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - img [ref=e26]
+          - text: School Portal
+        - heading "2026학년도학부모 상담신청" [level=1] [ref=e29]
+        - paragraph [ref=e30]: 학생 정보로 로그인해 원하는 상담 시간을 편리하게 예약하세요. 별도의 회원가입 없이 안전하게 이용하실 수 있습니다.
+      - generic [ref=e33]:
+        - generic [ref=e35]:
+          - button "학부모" [ref=e36]:
+            - img [ref=e37]
+            - generic [ref=e40]: 학부모
+          - button "교사" [active] [ref=e41]:
+            - img [ref=e42]
+            - generic [ref=e45]: 교사
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - img [ref=e49]
+            - paragraph [ref=e53]: 정확한 학생 및 학부모 정보를 입력해주세요.
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]:
+                - generic [ref=e57]: 학년
+                - combobox "학년" [ref=e58]:
+                  - option "1학년"
+                  - option "2학년"
+                  - option "3학년"
+                  - option "4학년"
+                  - option "5학년"
+                  - option "6학년" [selected]
+              - generic [ref=e59]:
+                - generic [ref=e60]: 반
+                - spinbutton "반" [ref=e61]
+              - generic [ref=e62]:
+                - generic [ref=e63]: 번호
+                - spinbutton "번호" [ref=e64]
+            - generic [ref=e65]:
+              - generic [ref=e66]:
+                - generic [ref=e67]: 학생 이름
+                - textbox "학생 이름" [ref=e68]:
+                  - /placeholder: "예: 김민수"
+              - generic [ref=e69]:
+                - generic [ref=e70]: 학부모 성함
+                - textbox "학부모 성함" [ref=e71]:
+                  - /placeholder: "예: 김지은"
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - generic [ref=e74]: 연락처
+                - textbox "연락처" [ref=e75]:
+                  - /placeholder: "01012345678"
+                - paragraph [ref=e76]: "하이픈(`-`)을 넣어도 자동으로 제외되어 저장됩니다."
+              - generic [ref=e77]:
+                - generic [ref=e78]: 비회원용 비밀번호
+                - textbox "비회원용 비밀번호" [ref=e79]:
+                  - /placeholder: "1234"
+                - paragraph [ref=e80]: 예약 확인을 위해 암호를 기억하세요.
+            - generic [ref=e81]:
+              - generic [ref=e82]:
+                - img [ref=e83]
+                - text: 개인정보의 안전한 보호 및 이용 안내
+              - paragraph [ref=e86]: 최초 1회 정보 입력을 통해 계정이 자동 생성됩니다. 입력하신 정보는 본인 확인 및 상담 관리를 위해서만 활용되며, 상담 기간 종료 시 모든 데이터는 즉시 영구 파기됩니다.
+              - generic [ref=e87]:
+                - generic [ref=e88]:
+                  - 'checkbox "개인정보 수집 및 이용 동의 (필수) 관리 주체: 여수신월초등학교 수집 항목: 학년, 반, 번호, 학생 이름, 학부모 이름, 연락처(휴대전화), 비회원용 비밀번호(4자리) 이용 목적: 학부모 상담 신청 및 예약 관리, 본인 확인, 상담 일정 안내 및 결과 통보 보관 기간: 상담 신청 및 관련 절차가 종료된 후 즉시 파기 (단, 관계 법령에 따라 보존할 필요가 있는 경우 해당 기간까지 보관)" [ref=e89]'
+                  - generic [ref=e90]:
+                    - strong [ref=e91]: 개인정보 수집 및 이용 동의 (필수)
+                    - generic [ref=e92]:
+                      - paragraph [ref=e93]: "관리 주체: 여수신월초등학교"
+                      - paragraph [ref=e94]: "수집 항목: 학년, 반, 번호, 학생 이름, 학부모 이름, 연락처(휴대전화), 비회원용 비밀번호(4자리)"
+                      - paragraph [ref=e95]: "이용 목적: 학부모 상담 신청 및 예약 관리, 본인 확인, 상담 일정 안내 및 결과 통보"
+                      - paragraph [ref=e96]: "보관 기간: 상담 신청 및 관련 절차가 종료된 후 즉시 파기 (단, 관계 법령에 따라 보존할 필요가 있는 경우 해당 기간까지 보관)"
+                - generic [ref=e97]:
+                  - 'checkbox "개인정보의 제3자 제공 동의 (필수) 제공 기관: Supabase, Inc. (데이터 위탁 처리) 이용 목적: 상담 신청 데이터의 안전한 저장 및 클라우드 인프라 제공 보관 기간: 서비스 이용 종료 시까지 또는 위탁 계약 종료 시까지" [ref=e98]'
+                  - generic [ref=e99]:
+                    - strong [ref=e100]: 개인정보의 제3자 제공 동의 (필수)
+                    - generic [ref=e101]:
+                      - paragraph [ref=e102]: "제공 기관: Supabase, Inc. (데이터 위탁 처리)"
+                      - paragraph [ref=e103]: "이용 목적: 상담 신청 데이터의 안전한 저장 및 클라우드 인프라 제공"
+                      - paragraph [ref=e104]: "보관 기간: 서비스 이용 종료 시까지 또는 위탁 계약 종료 시까지"
+            - button "정보 확인 후 상담 포털 입장하기" [ref=e105]
+    - generic [ref=e107]:
+      - generic [ref=e108]:
+        - paragraph [ref=e109]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e110]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e111] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e112]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e113]:
+        - generic [ref=e114]: 개인정보 처리방침
+        - generic [ref=e115]: 이용약관
+        - generic [ref=e116]: 상담 일정
+        - generic [ref=e117]: 학교 문의
+  - region "Notifications alt+T"

@@ -1,0 +1,114 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - link "Sinwol Elementary" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: Sinwol
+        - generic [ref=e8]: Elementary
+      - button "로그아웃" [ref=e11]:
+        - img [ref=e12]
+        - text: 로그아웃
+    - generic [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: 교사용
+          - heading "상담 설정" [level=1] [ref=e22]
+          - paragraph [ref=e23]: 주차별 운영 시간을 차분하게 조정할 수 있게 입력 흐름을 단순화했습니다. 예약이 이미 들어간 주차는 혼선을 막기 위해 잠금 상태로 표시합니다.
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - img [ref=e26]
+            - text: 6학년 1반
+          - generic [ref=e29]: 담당 교사 배정 예정
+          - generic [ref=e30]:
+            - img [ref=e31]
+            - text: 읽지 않은 알림 1건
+        - navigation [ref=e34]:
+          - link "대시보드" [ref=e35] [cursor=pointer]:
+            - /url: /teacher/dashboard
+            - img [ref=e36]
+            - text: 대시보드
+          - link "상담 설정" [ref=e39] [cursor=pointer]:
+            - /url: /teacher/settings
+            - img [ref=e40]
+            - text: 상담 설정
+          - link "날짜 조정" [ref=e43] [cursor=pointer]:
+            - /url: /teacher/availability
+            - img [ref=e44]
+            - text: 날짜 조정
+      - generic [ref=e48]:
+        - generic [ref=e49]:
+          - heading "운영 시간 설정" [level=2] [ref=e50]
+          - paragraph [ref=e51]: 각 주차의 시간 간격과 시작, 종료 시각을 조정합니다. 이미 예약이 들어간 주차는 슬롯을 다시 만들 수 없으므로 입력창이 잠깁니다.
+        - generic [ref=e53]:
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]:
+                - heading "3월 마지막 주" [level=3] [ref=e57]
+                - generic [ref=e58]: 예약 존재로 잠금
+              - paragraph [ref=e59]: 3월 30일 - 4월 3일
+            - generic [ref=e60]:
+              - generic [ref=e61]: 예약 2건
+              - generic [ref=e62]: 총 슬롯 50개
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]: 시간 간격
+              - combobox "시간 간격" [disabled] [ref=e66]:
+                - option "10분"
+                - option "20분" [selected]
+                - option "30분"
+            - generic [ref=e67]:
+              - generic [ref=e68]: 시작 시간
+              - textbox "시작 시간" [disabled] [ref=e69]: 13:20
+            - generic [ref=e70]:
+              - generic [ref=e71]: 종료 시간
+              - textbox "종료 시간" [disabled] [ref=e72]: 16:40
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: 이 주차에는 이미 예약이 있어 시간 설정을 다시 만들 수 없습니다.
+            - button "수정 잠김" [disabled]:
+              - img
+              - text: 수정 잠김
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - heading "4월 첫째 주" [level=3] [ref=e80]
+                - generic [ref=e81]: 수정 가능
+              - paragraph [ref=e82]: 4월 6일 - 4월 10일
+            - generic [ref=e83]:
+              - generic [ref=e84]: 예약 0건
+              - generic [ref=e85]: 총 슬롯 50개
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - generic [ref=e88]: 시간 간격
+              - combobox "시간 간격" [ref=e89]:
+                - option "10분"
+                - option "20분" [selected]
+                - option "30분"
+            - generic [ref=e90]:
+              - generic [ref=e91]: 시작 시간
+              - textbox "시작 시간" [ref=e92]: 13:20
+            - generic [ref=e93]:
+              - generic [ref=e94]: 종료 시간
+              - textbox "종료 시간" [ref=e95]: 16:40
+          - generic [ref=e96]:
+            - paragraph [ref=e97]: 저장하면 선택한 주차의 슬롯 구성이 새 운영 시간 기준으로 다시 생성됩니다.
+            - button "설정 저장" [ref=e98]:
+              - img [ref=e99]
+              - text: 설정 저장
+    - generic [ref=e104]:
+      - generic [ref=e105]:
+        - paragraph [ref=e106]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e107]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e108] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e109]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e110]:
+        - generic [ref=e111]: 개인정보 처리방침
+        - generic [ref=e112]: 이용약관
+        - generic [ref=e113]: 상담 일정
+        - generic [ref=e114]: 학교 문의
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e120] [cursor=pointer]:
+    - img [ref=e121]
+  - alert [ref=e124]

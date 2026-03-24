@@ -1,0 +1,29 @@
+[     148ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:3000/auth:0
+[     324ms] Error: ./src/components/dashboard/teacher-dashboard-client.tsx:898:134
+Expected '</', got ':'
+  896 |                             {notification.title}
+  897 |                           </p>
+> 898 |                           {!notification.isRead ? <Badge variant="booked">새 알림</Badge> : <Badge variant="muted">읽음</Badge> : null}
+      |                                                                                                                                 ^
+  899 |                         </div>
+  900 |                         <p className="text-readable mt-2 text-sm leading-relaxed text-[color:var(--text-soft)]">
+  901 |                           {notification.message}
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/dashboard/teacher-dashboard-client.tsx
+    ./src/app/teacher/dashboard/page.tsx
+
+
+    at <unknown> (Error: ./src/components/dashboard/teacher-dashboard-client.tsx:898:134)
+    at Object.getCompilationErrors (file:///Users/user/task/parent-consultation/node_modules/next/dist/server/dev/hot-reloader-turbopack.js:1189:59)
+    at DevBundlerService.getCompilationError (file:///Users/user/task/parent-consultation/node_modules/next/dist/server/lib/dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file:///Users/user/task/parent-consultation/node_modules/next/dist/server/dev/next-dev-server.js:719:42)
+    at DevServer.findPageComponents (file:///Users/user/task/parent-consultation/node_modules/next/dist/server/dev/next-dev-server.js:689:43)
+    at async DevServer.renderErrorToResponseImpl (file:///Users/user/task/parent-consultation/node_modules/next/dist/server/base-server.js:1745:26)
+[     318ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr' failed: Error during WebSocket handshake: net::ERR_INVALID_HTTP_RESPONSE @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2342
+[     387ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://127.0.0.1:3000/__nextjs_original-stack-frames:0
+[    1342ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr' failed: Error during WebSocket handshake: net::ERR_INVALID_HTTP_RESPONSE @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2342
+[    2346ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr' failed: Error during WebSocket handshake: net::ERR_INVALID_HTTP_RESPONSE @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2342

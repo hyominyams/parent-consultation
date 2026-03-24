@@ -1,0 +1,147 @@
+- generic [active] [ref=e1]:
+  - main [ref=e104]:
+    - generic [ref=e106]:
+      - link "Sinwol Elementary" [ref=e108] [cursor=pointer]:
+        - /url: /teacher/dashboard
+        - generic [ref=e109]: Sinwol
+        - generic [ref=e110]: Elementary
+      - link "교사 포털" [ref=e113] [cursor=pointer]:
+        - /url: /teacher/dashboard
+        - img [ref=e114]
+        - text: 교사 포털
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - img [ref=e119]
+          - text: 새 알림 0건
+        - generic [ref=e122]: 예시
+        - button "로그아웃" [ref=e124]:
+          - img [ref=e125]
+          - text: 로그아웃
+    - generic [ref=e129]:
+      - generic [ref=e130]:
+        - generic [ref=e132]:
+          - generic [ref=e134]:
+            - generic [ref=e135]: Teacher Portal
+            - heading "교사 대시보드" [level=1] [ref=e136]
+            - paragraph [ref=e137]: 예약 요약을 확인하고 일정 관리와 상담 설정 화면으로 이동합니다.
+          - generic [ref=e138]:
+            - generic [ref=e139]:
+              - img [ref=e140]
+              - text: 6학년 13반
+            - generic [ref=e143]: 담당 교사 예시
+            - generic [ref=e144]:
+              - img [ref=e145]
+              - text: 읽지 않은 알림 0건
+        - navigation [ref=e149]:
+          - link "대시보드" [ref=e150] [cursor=pointer]:
+            - /url: /teacher/dashboard
+            - img [ref=e151]
+            - text: 대시보드
+          - link "상담 설정" [ref=e154] [cursor=pointer]:
+            - /url: /teacher/settings
+            - img [ref=e155]
+            - text: 상담 설정
+          - link "일정 관리" [ref=e158] [cursor=pointer]:
+            - /url: /teacher/availability
+            - img [ref=e159]
+            - text: 일정 관리
+      - generic [ref=e163]:
+        - generic [ref=e165]:
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: Overview
+              - heading "오늘 확인할 항목" [level=2] [ref=e169]
+              - paragraph [ref=e170]: 새 알림과 예약 현황을 먼저 확인하고, 일정 관리나 상담 설정 화면으로 바로 이동할 수 있습니다.
+            - generic [ref=e171]:
+              - link "일정 관리" [ref=e172] [cursor=pointer]:
+                - /url: /teacher/availability
+                - img [ref=e173]
+                - text: 일정 관리
+              - link "상담 설정" [ref=e175] [cursor=pointer]:
+                - /url: /teacher/settings
+                - img [ref=e176]
+                - text: 상담 설정
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - paragraph [ref=e181]: 읽지 않은 알림
+              - paragraph [ref=e182]: 0건
+              - paragraph [ref=e183]: 새 예약과 변경 사항을 확인합니다.
+            - generic [ref=e184]:
+              - paragraph [ref=e185]: 예약 완료
+              - paragraph [ref=e186]: 0건
+              - paragraph [ref=e187]: 이미 신청이 완료된 상담입니다.
+            - generic [ref=e188]:
+              - paragraph [ref=e189]: 신청 가능
+              - paragraph [ref=e190]: 94개
+              - paragraph [ref=e191]: 학부모가 현재 선택할 수 있는 시간입니다.
+            - generic [ref=e192]:
+              - paragraph [ref=e193]: 신청 불가
+              - paragraph [ref=e194]: 1개
+              - paragraph [ref=e195]: 직접 닫아 둔 시간입니다.
+        - generic [ref=e196]:
+          - generic [ref=e197]:
+            - heading "바로 이동" [level=2] [ref=e198]
+            - paragraph [ref=e199]: 자주 사용하는 관리 화면으로 빠르게 이동할 수 있습니다.
+            - generic [ref=e200]:
+              - link "일정 관리 날짜별, 시간대별 상담 가능 상태를 조정합니다. 일정 관리 열기" [ref=e201] [cursor=pointer]:
+                - /url: /teacher/availability
+                - generic [ref=e202]:
+                  - generic [ref=e203]:
+                    - paragraph [ref=e204]: 일정 관리
+                    - heading "날짜별, 시간대별 상담 가능 상태를 조정합니다." [level=3] [ref=e205]
+                    - generic [ref=e206]:
+                      - text: 일정 관리 열기
+                      - img [ref=e207]
+                  - img [ref=e210]
+              - link "상담 설정 시간 간격과 운영 시간을 주차별로 조정합니다. 설정 열기" [ref=e214] [cursor=pointer]:
+                - /url: /teacher/settings
+                - generic [ref=e215]:
+                  - generic [ref=e216]:
+                    - paragraph [ref=e217]: 상담 설정
+                    - heading "시간 간격과 운영 시간을 주차별로 조정합니다." [level=3] [ref=e218]
+                    - generic [ref=e219]:
+                      - text: 설정 열기
+                      - img [ref=e220]
+                  - img [ref=e223]
+          - generic [ref=e226]:
+            - generic [ref=e227]:
+              - generic [ref=e228]:
+                - heading "최근 알림" [level=2] [ref=e229]
+                - paragraph [ref=e230]: 최근 알림 3건을 먼저 확인할 수 있습니다.
+              - button "전체 읽음" [disabled]:
+                - img
+                - text: 전체 읽음
+            - generic [ref=e231]:
+              - generic [ref=e234]:
+                - generic [ref=e235]:
+                  - paragraph [ref=e236]: 예약 취소
+                  - generic [ref=e237]: 읽음
+                - paragraph [ref=e238]: 예시 학생의 상담 예약이 취소되었습니다.
+                - paragraph [ref=e239]: 2026년 3월 23일 (월)
+              - generic [ref=e242]:
+                - generic [ref=e243]:
+                  - paragraph [ref=e244]: 새 상담 신청
+                  - generic [ref=e245]: 읽음
+                - paragraph [ref=e246]: 예시 학생이 4월 3일 15:40 상담을 신청했습니다.
+                - paragraph [ref=e247]: 2026년 3월 23일 (월)
+              - generic [ref=e250]:
+                - generic [ref=e251]:
+                  - paragraph [ref=e252]: 예약 취소
+                  - generic [ref=e253]: 읽음
+                - paragraph [ref=e254]: 예시 학생의 상담 예약이 취소되었습니다.
+                - paragraph [ref=e255]: 2026년 3월 23일 (월)
+    - generic [ref=e257]:
+      - generic [ref=e258]:
+        - paragraph [ref=e259]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e260]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e261] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e262]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e263]:
+        - generic [ref=e264]: 개인정보 처리방침
+        - generic [ref=e265]: 이용약관
+        - generic [ref=e266]: 상담 일정
+        - generic [ref=e267]: 학교 문의
+  - region "Notifications alt+T"
+  - alert [ref=e103]

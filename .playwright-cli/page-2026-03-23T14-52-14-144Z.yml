@@ -1,0 +1,125 @@
+- generic [active] [ref=e1]:
+  - main [ref=e653]:
+    - generic [ref=e655]:
+      - link "Sinwol Elementary" [ref=e657] [cursor=pointer]:
+        - /url: /teacher/dashboard
+        - generic [ref=e658]: Sinwol
+        - generic [ref=e659]: Elementary
+      - link "교사 포털" [ref=e662] [cursor=pointer]:
+        - /url: /teacher/dashboard
+        - img [ref=e663]
+        - text: 교사 포털
+      - generic [ref=e666]:
+        - generic [ref=e667]:
+          - img [ref=e668]
+          - text: 새 알림 0건
+        - generic [ref=e671]: 예시
+        - button "로그아웃" [ref=e673]:
+          - img [ref=e674]
+          - text: 로그아웃
+    - generic [ref=e678]:
+      - generic [ref=e679]:
+        - generic [ref=e681]:
+          - generic [ref=e683]:
+            - generic [ref=e684]: Teacher Portal
+            - heading "상담 설정" [level=1] [ref=e685]
+            - paragraph [ref=e686]: 주차별 시간 간격과 운영 시간을 설정합니다.
+          - generic [ref=e687]:
+            - generic [ref=e688]:
+              - img [ref=e689]
+              - text: 6학년 13반
+            - generic [ref=e692]: 담당 교사 예시
+            - generic [ref=e693]:
+              - img [ref=e694]
+              - text: 읽지 않은 알림 0건
+        - navigation [ref=e698]:
+          - link "대시보드" [ref=e699] [cursor=pointer]:
+            - /url: /teacher/dashboard
+            - img [ref=e700]
+            - text: 대시보드
+          - link "상담 설정" [ref=e703] [cursor=pointer]:
+            - /url: /teacher/settings
+            - img [ref=e704]
+            - text: 상담 설정
+          - link "일정 관리" [ref=e707] [cursor=pointer]:
+            - /url: /teacher/availability
+            - img [ref=e708]
+            - text: 일정 관리
+      - generic [ref=e712]:
+        - generic [ref=e714]:
+          - generic [ref=e715]: Settings
+          - heading "주차별 상담 설정" [level=2] [ref=e716]
+          - paragraph [ref=e717]: 시간 간격과 운영 시간을 주차별로 설정할 수 있습니다. 예약이 이미 있는 주차는 변경이 잠깁니다.
+        - generic [ref=e719]:
+          - generic [ref=e720]:
+            - generic [ref=e721]:
+              - generic [ref=e722]:
+                - heading "3월 마지막 주" [level=3] [ref=e723]
+                - generic [ref=e724]: 편집 가능
+              - paragraph [ref=e725]: 3월 30일 - 4월 3일
+            - generic [ref=e726]:
+              - generic [ref=e727]: 예약 0건
+              - generic [ref=e728]: 총 슬롯 45개
+          - generic [ref=e729]:
+            - generic [ref=e730]:
+              - generic [ref=e731]: 시간 간격
+              - combobox "시간 간격" [ref=e732]:
+                - option "10분" [selected]
+                - option "20분"
+                - option "30분"
+            - generic [ref=e733]:
+              - generic [ref=e734]: 시작 시간
+              - textbox "시작 시간" [ref=e735]: 15:10
+            - generic [ref=e736]:
+              - generic [ref=e737]: 종료 시간
+              - textbox "종료 시간" [ref=e738]: 16:40
+          - generic [ref=e739]:
+            - paragraph [ref=e740]: 저장하면 이 주차의 슬롯이 다시 생성됩니다.
+            - button "설정 저장" [ref=e741]:
+              - img [ref=e742]
+              - text: 설정 저장
+        - generic [ref=e747]:
+          - generic [ref=e748]:
+            - generic [ref=e749]:
+              - generic [ref=e750]:
+                - heading "4월 첫째 주" [level=3] [ref=e751]
+                - generic [ref=e752]: 편집 가능
+              - paragraph [ref=e753]: 4월 6일 - 4월 10일
+            - generic [ref=e754]:
+              - generic [ref=e755]: 예약 0건
+              - generic [ref=e756]: 총 슬롯 50개
+          - generic [ref=e757]:
+            - generic [ref=e758]:
+              - generic [ref=e759]: 시간 간격
+              - combobox "시간 간격" [ref=e760]:
+                - option "10분"
+                - option "20분" [selected]
+                - option "30분"
+            - generic [ref=e761]:
+              - generic [ref=e762]: 시작 시간
+              - textbox "시작 시간" [ref=e763]: 13:20
+            - generic [ref=e764]:
+              - generic [ref=e765]: 종료 시간
+              - textbox "종료 시간" [ref=e766]: 16:40
+          - generic [ref=e767]:
+            - paragraph [ref=e768]: 저장하면 이 주차의 슬롯이 다시 생성됩니다.
+            - button "설정 저장" [ref=e769]:
+              - img [ref=e770]
+              - text: 설정 저장
+    - generic [ref=e775]:
+      - generic [ref=e776]:
+        - paragraph [ref=e777]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e778]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e779] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e780]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e781]:
+        - generic [ref=e782]: 개인정보 처리방침
+        - generic [ref=e783]: 이용약관
+        - generic [ref=e784]: 상담 일정
+        - generic [ref=e785]: 학교 문의
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e108] [cursor=pointer]:
+    - img [ref=e109]
+  - alert [ref=e112]

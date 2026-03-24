@@ -1,0 +1,75 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - link "Sinwol Elementary" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: Sinwol
+        - generic [ref=e8]: Elementary
+      - generic [ref=e10]:
+        - link "소개" [ref=e11] [cursor=pointer]:
+          - /url: /
+          - img [ref=e12]
+          - text: 소개
+        - link "예약" [ref=e14] [cursor=pointer]:
+          - /url: /reserve
+          - img [ref=e15]
+          - text: 예약
+        - link "내 신청" [ref=e17] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e18]
+          - text: 내 신청
+      - link "시작하기" [ref=e22] [cursor=pointer]:
+        - /url: /reserve
+    - generic [ref=e23]:
+      - img "Educational hero background" [ref=e25]
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - generic [ref=e29]: 2026학년도 1학기
+      - generic [ref=e30]:
+        - paragraph [ref=e31]: 여수 신월초등학교
+        - heading "학부모상담 신청 프로그램" [level=1] [ref=e34]:
+          - generic [ref=e35]: 학부모상담 신청 프로그램
+      - paragraph [ref=e36]: 선생님과의 진솔한 대화로 아이의 더 나은 내일을 만들어갑니다. 원하시는 상담 일정을 온라인으로 손쉽게 확정하세요.
+      - generic [ref=e37]:
+        - link "상담 예약 시작하기" [ref=e38] [cursor=pointer]:
+          - /url: /auth
+          - text: 상담 예약 시작하기
+          - img [ref=e39]
+        - link "예약 내역 조회" [ref=e41] [cursor=pointer]:
+          - /url: /dashboard
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e46]:
+          - heading "소중한 우리 아이의 올바른 성장을 위한 첫 상담" [level=3] [ref=e47]
+          - paragraph [ref=e48]: 선생님과의 첫 대화를 통해 아이의 학업 성취와 정서적 건강을 함께 고민하고, 올바른 성장을 지원하는 소중하고 유의미한 시간을 가져보세요.
+        - img "Collaborative Room" [ref=e51]
+      - generic [ref=e52]:
+        - img [ref=e54]
+        - generic [ref=e57]:
+          - heading "강력한 정보 보호" [level=3] [ref=e58]
+          - paragraph [ref=e59]: 입력하신 연락처 및 예약 내역은 최고 수준의 보안으로 유지되며, 상담이 종료된 직후 모두 폐기됩니다.
+      - generic [ref=e61]:
+        - heading "20분" [level=2] [ref=e62]
+        - heading "밀도 있는 집중 상담" [level=3] [ref=e63]
+        - paragraph [ref=e64]: 가장 핵심적인 학업 이야기를 나누고 구체적인 계획을 수립할 수 있도록 최적화된 시간을 제공합니다.
+      - generic [ref=e65]:
+        - generic [ref=e66]:
+          - heading "복잡한 절차 없이 간편하게" [level=3] [ref=e67]
+          - paragraph [ref=e68]: PC와 모바일 언제 어디서든 접속하여 실시간 빈자리를 확인하고, 가장 편리한 일정을 직접 선택하세요.
+        - generic [ref=e70]: 초등 1~6학년
+    - generic [ref=e72]:
+      - generic [ref=e73]:
+        - paragraph [ref=e74]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e75]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e76] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e77]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e78]:
+        - generic [ref=e79]: 개인정보 처리방침
+        - generic [ref=e80]: 이용약관
+        - generic [ref=e81]: 상담 일정
+        - generic [ref=e82]: 학교 문의
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e88] [cursor=pointer]:
+    - img [ref=e89]

@@ -1,0 +1,122 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - link "Sinwol Elementary" [ref=e6] [cursor=pointer]:
+        - /url: /teacher/dashboard
+        - generic [ref=e7]: Sinwol
+        - generic [ref=e8]: Elementary
+      - link "교사 포털" [ref=e11] [cursor=pointer]:
+        - /url: /teacher/dashboard
+        - img [ref=e12]
+        - text: 교사 포털
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - img [ref=e17]
+          - text: 새 알림 1건
+        - generic [ref=e20]: 배정 예정
+        - button "로그아웃" [ref=e22]:
+          - img [ref=e23]
+          - text: 로그아웃
+    - generic [ref=e27]:
+      - generic [ref=e29]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: 교사 포털
+          - heading "상담 설정" [level=1] [ref=e33]
+          - paragraph [ref=e34]: 주차별 시간 간격과 운영 시간 설정
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - img [ref=e37]
+            - text: 6학년 1반
+          - generic [ref=e40]: 담당 교사 배정 예정
+          - generic [ref=e41]:
+            - img [ref=e42]
+            - text: 읽지 않은 알림 1건
+        - navigation [ref=e45]:
+          - link "대시보드" [ref=e46] [cursor=pointer]:
+            - /url: /teacher/dashboard
+            - img [ref=e47]
+            - text: 대시보드
+          - link "상담 설정" [ref=e50] [cursor=pointer]:
+            - /url: /teacher/settings
+            - img [ref=e51]
+            - text: 상담 설정
+          - link "날짜 조정" [ref=e54] [cursor=pointer]:
+            - /url: /teacher/availability
+            - img [ref=e55]
+            - text: 날짜 조정
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - heading "주차별 시간 설정" [level=2] [ref=e61]
+          - paragraph [ref=e62]: 간격, 시작, 종료 시간
+        - generic [ref=e64]:
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]:
+                - heading "3월 마지막 주" [level=3] [ref=e68]
+                - generic [ref=e69]: 잠김
+              - paragraph [ref=e70]: 3월 30일 - 4월 3일
+            - generic [ref=e71]:
+              - generic [ref=e72]: 예약 2건
+              - generic [ref=e73]: 총 슬롯 50개
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - generic [ref=e76]: 시간 간격
+              - combobox "시간 간격" [disabled] [ref=e77]:
+                - option "10분"
+                - option "20분" [selected]
+                - option "30분"
+            - generic [ref=e78]:
+              - generic [ref=e79]: 시작 시간
+              - textbox "시작 시간" [disabled] [ref=e80]: 13:20
+            - generic [ref=e81]:
+              - generic [ref=e82]: 종료 시간
+              - textbox "종료 시간" [disabled] [ref=e83]: 16:40
+          - generic [ref=e84]:
+            - paragraph [ref=e85]: 예약 존재
+            - button "수정 잠김" [disabled]:
+              - img
+              - text: 수정 잠김
+        - generic [ref=e87]:
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - heading "4월 첫째 주" [level=3] [ref=e91]
+                - generic [ref=e92]: 편집 가능
+              - paragraph [ref=e93]: 4월 6일 - 4월 10일
+            - generic [ref=e94]:
+              - generic [ref=e95]: 예약 0건
+              - generic [ref=e96]: 총 슬롯 50개
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - generic [ref=e99]: 시간 간격
+              - combobox "시간 간격" [ref=e100]:
+                - option "10분"
+                - option "20분" [selected]
+                - option "30분"
+            - generic [ref=e101]:
+              - generic [ref=e102]: 시작 시간
+              - textbox "시작 시간" [ref=e103]: 13:20
+            - generic [ref=e104]:
+              - generic [ref=e105]: 종료 시간
+              - textbox "종료 시간" [ref=e106]: 16:40
+          - generic [ref=e107]:
+            - paragraph [ref=e108]: 저장 시 슬롯 재생성
+            - button "설정 저장" [ref=e109]:
+              - img [ref=e110]
+              - text: 설정 저장
+    - generic [ref=e115]:
+      - generic [ref=e116]:
+        - paragraph [ref=e117]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e118]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e119] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e120]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e121]:
+        - generic [ref=e122]: 개인정보 처리방침
+        - generic [ref=e123]: 이용약관
+        - generic [ref=e124]: 상담 일정
+        - generic [ref=e125]: 학교 문의
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e131] [cursor=pointer]:
+    - img [ref=e132]

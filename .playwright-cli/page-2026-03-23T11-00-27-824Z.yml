@@ -1,0 +1,75 @@
+- generic [active] [ref=e1]:
+  - main [ref=e415]:
+    - generic [ref=e417]:
+      - link "Sinwol Elementary" [ref=e419] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e420]: Sinwol
+        - generic [ref=e421]: Elementary
+      - generic [ref=e423]:
+        - link "소개" [ref=e424] [cursor=pointer]:
+          - /url: /
+          - img [ref=e425]
+          - text: 소개
+        - link "예약" [ref=e427] [cursor=pointer]:
+          - /url: /reserve
+          - img [ref=e428]
+          - text: 예약
+        - link "내 신청" [ref=e430] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e431]
+          - text: 내 신청
+      - generic [ref=e434]:
+        - generic [ref=e435]: 테스트학부모16
+        - button "로그아웃" [ref=e437]:
+          - img [ref=e438]
+          - text: 로그아웃
+    - generic [ref=e442]:
+      - generic [ref=e443]:
+        - img [ref=e445]
+        - heading "테스트학생16 학생 예약 내역" [level=1] [ref=e447]
+        - paragraph [ref=e448]: 상담 예약이 완료되었습니다. 아래에서 예약 일정을 확인해 주세요.
+      - generic [ref=e449]:
+        - generic [ref=e451]:
+          - generic [ref=e452]:
+            - paragraph [ref=e453]: 예약 일자
+            - paragraph [ref=e454]: 2026년 3월 31일 (화)
+          - generic [ref=e455]:
+            - paragraph [ref=e456]: 예약 시간
+            - generic [ref=e457]:
+              - img [ref=e458]
+              - generic [ref=e461]: 15:00 - 15:20
+            - generic [ref=e462]:
+              - img [ref=e463]
+              - generic [ref=e468]: 대면 상담
+          - generic [ref=e469]:
+            - paragraph [ref=e470]: 학급 정보
+            - paragraph [ref=e471]: 6학년 1반
+          - generic [ref=e472]:
+            - paragraph [ref=e473]: 담당 교사
+            - paragraph [ref=e474]: 배정 예정 선생님
+        - generic [ref=e475]:
+          - paragraph [ref=e476]: 일정 변경이나 예약 취소가 필요하시면 아래 버튼을 이용해 주세요.
+          - generic [ref=e477]:
+            - button "예약 변경" [ref=e478]:
+              - img [ref=e479]
+              - text: 예약 변경
+            - button "예약 삭제" [ref=e484]:
+              - img [ref=e485]
+              - text: 예약 삭제
+    - generic [ref=e489]:
+      - generic [ref=e490]:
+        - paragraph [ref=e491]: 여수신월초등학교 상담 포털
+        - paragraph [ref=e492]:
+          - text: "담당 교사: 박준효 | 이메일:"
+          - link "jhjhpark0800@gmail.com" [ref=e493] [cursor=pointer]:
+            - /url: mailto:jhjhpark0800@gmail.com
+        - paragraph [ref=e494]: © 2026 여수신월초등학교. 모든 권리 보유.
+      - generic [ref=e495]:
+        - generic [ref=e496]: 개인정보 처리방침
+        - generic [ref=e497]: 이용약관
+        - generic [ref=e498]: 상담 일정
+        - generic [ref=e499]: 학교 문의
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e123] [cursor=pointer]:
+    - img [ref=e124]
+  - alert [ref=e409]
