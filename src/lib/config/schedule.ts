@@ -7,11 +7,11 @@ export const CONSULTATION_WEEKS = [
     endDate: "2026-04-03",
   },
   {
-    weekKey: "2026-04-27",
-    label: "4월 마지막 주",
-    description: "4월 27일 - 5월 1일",
-    startDate: "2026-04-27",
-    endDate: "2026-05-01",
+    weekKey: "2026-04-06",
+    label: "4월 첫째 주",
+    description: "4월 6일 - 4월 10일",
+    startDate: "2026-04-06",
+    endDate: "2026-04-10",
   },
 ] as const;
 

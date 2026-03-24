@@ -1,7 +1,7 @@
 import { eachDayOfInterval, format } from "date-fns";
 
-import { DEFAULT_SCHEDULE_CONFIG, CONSULTATION_WEEKS } from "@/lib/config/schedule";
-import { createId, nowIsoString, requireMaybeSingle } from "@/lib/db/helpers";
+import { CONSULTATION_WEEK_KEYS, DEFAULT_SCHEDULE_CONFIG, CONSULTATION_WEEKS } from "@/lib/config/schedule";
+import { createId, nowIsoString, requireData, requireMaybeSingle } from "@/lib/db/helpers";
 import { supabaseAdmin } from "@/lib/db/supabase";
 import type { ClassScheduleConfigRow } from "@/lib/db/types";
 import { combineKstDateTime, generateTimeBlocks } from "@/lib/utils";
@@ -107,7 +107,42 @@ async function ensureWeekSchedule(input: {
   }
 }
 
+async function removeObsoleteWeekSchedules(grade: number, classroom: number) {
+  const activeWeekKeys = new Set<string>(CONSULTATION_WEEK_KEYS);
+  const existingConfigs =
+    (requireData(
+      await supabaseAdmin
+        .from("ClassScheduleConfig")
+        .select("weekKey")
+        .eq("grade", grade)
+        .eq("classroom", classroom),
+      "Failed to load existing class schedule configs.",
+    ) ?? []) as Array<Pick<ClassScheduleConfigRow, "weekKey">>;
+
+  const obsoleteWeekKeys = existingConfigs
+    .map((config) => config.weekKey)
+    .filter((weekKey) => !activeWeekKeys.has(weekKey));
+
+  if (obsoleteWeekKeys.length === 0) {
+    return;
+  }
+
+  // Deleting obsolete configs also clears linked slots and reservations via FK cascade.
+  const { error } = await supabaseAdmin
+    .from("ClassScheduleConfig")
+    .delete()
+    .eq("grade", grade)
+    .eq("classroom", classroom)
+    .in("weekKey", obsoleteWeekKeys);
+
+  if (error) {
+    throw new Error(`Failed to remove obsolete class schedule configs. ${error.message}`);
+  }
+}
+
 export async function ensureClassSchedule(grade: number, classroom: number) {
+  await removeObsoleteWeekSchedules(grade, classroom);
+
   for (const week of CONSULTATION_WEEKS) {
     await ensureWeekSchedule({
       grade,
