@@ -184,6 +184,32 @@ function formatReservationCreatedAt(value?: string) {
   return `${RESERVATION_CREATED_AT_FORMATTER.format(new Date(value))} 신청`;
 }
 
+function getBookedSlotConsultationLabel(type?: SlotItem["reservedConsultationType"]) {
+  if (type === "PHONE") {
+    return "전화";
+  }
+
+  if (type === "IN_PERSON") {
+    return "대면";
+  }
+
+  return "예약";
+}
+
+function getCompactStudentName(name?: string) {
+  const normalizedName = name?.replace(/\s+/g, "") ?? "";
+
+  if (!normalizedName) {
+    return "예약";
+  }
+
+  if (normalizedName.length === 1) {
+    return normalizedName;
+  }
+
+  return normalizedName.slice(1);
+}
+
 function BookedSlotDetails({
   day,
   slot,
@@ -482,11 +508,20 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                               <div className="flex min-w-0 flex-col items-end gap-2">
                                 <span
                                   className={cn(
-                                    "max-w-full shrink-0 truncate rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                                    "inline-flex min-w-11 items-center justify-center rounded-full px-2.5 py-1 text-[11px] font-semibold",
                                     slotTone.badgeClassName,
                                   )}
                                 >
-                                  {slot.reservedStudentName ?? slotTone.label}
+                                  {getBookedSlotConsultationLabel(slot.reservedConsultationType)}
+                                </span>
+                                <span
+                                  title={slot.reservedStudentName ?? slotTone.label}
+                                  className={cn(
+                                    "max-w-full truncate text-[12px] font-semibold",
+                                    slotTone.timeClassName ?? "text-[color:var(--text-strong)]",
+                                  )}
+                                >
+                                  {getCompactStudentName(slot.reservedStudentName)}
                                 </span>
                               </div>
                             </div>
