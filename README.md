@@ -53,6 +53,10 @@ This repository now includes the initial Supabase migration:
 
 - `supabase/migrations/20260323160000_init.sql`
 
+Security note:
+
+- Tables created in the exposed `public` schema via raw SQL must explicitly enable RLS in the same migration or in an immediate follow-up hardening migration.
+
 To push pending Supabase migrations:
 
 ```bash
