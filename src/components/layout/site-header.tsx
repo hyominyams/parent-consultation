@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Bell, BookOpen, CalendarRange, GraduationCap, LogOut, ShieldCheck } from "lucide-react";
+import { BookOpen, CalendarRange, GraduationCap, LogOut, ShieldCheck } from "lucide-react";
 
 import { logoutAction } from "@/lib/actions/auth-actions";
+import { TeacherNotificationMenu } from "@/components/layout/teacher-notification-menu";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { getSession } from "@/lib/auth/session";
 import { countTeacherUnreadNotifications } from "@/lib/db/queries";
+import { getTeacherNotificationFeed } from "@/lib/teacher-notifications";
 
 type SiteHeaderProps = {
   currentPath?: string;
@@ -16,11 +17,13 @@ export async function SiteHeader({ currentPath, teacherUnreadCount }: SiteHeader
   const session = await getSession();
   const homeHref = session?.userType === "TEACHER" ? "/teacher/dashboard" : "/";
 
-  const unreadCount =
+  const [unreadCount, notificationPreview] =
     session?.userType === "TEACHER"
-      ? (teacherUnreadCount ??
-        (await countTeacherUnreadNotifications(session.userId)))
-      : 0;
+      ? await Promise.all([
+          teacherUnreadCount ?? countTeacherUnreadNotifications(session.userId),
+          getTeacherNotificationFeed(session.userId, 4),
+        ])
+      : [0, []];
 
   const links =
     session?.userType === "TEACHER"
@@ -87,10 +90,10 @@ export async function SiteHeader({ currentPath, teacherUnreadCount }: SiteHeader
         {/* Right Section: Auth/Buttons */}
         <div className="flex flex-1 items-center justify-end gap-3">
           {session?.userType === "TEACHER" ? (
-            <Badge variant={unreadCount > 0 ? "booked" : "muted"} className="hidden sm:inline-flex">
-              <Bell className="mr-1 h-3.5 w-3.5" />
-              새 알림 {unreadCount}건
-            </Badge>
+            <TeacherNotificationMenu
+              unreadCount={unreadCount}
+              notifications={notificationPreview}
+            />
           ) : null}
           
           {session ? (

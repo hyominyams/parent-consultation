@@ -64,6 +64,17 @@ export async function getReservationByParentUserId(parentUserId: string) {
   );
 }
 
+export async function getReservationsByIds(reservationIds: string[]) {
+  if (reservationIds.length === 0) {
+    return [] satisfies ReservationRow[];
+  }
+
+  return (requireData(
+    await supabaseAdmin.from("Reservation").select("*").in("id", reservationIds),
+    "Failed to load reservations by IDs.",
+  ) ?? []) as ReservationRow[];
+}
+
 export async function getReservationsBySlotIds(slotIds: string[]) {
   if (slotIds.length === 0) {
     return [] satisfies ReservationRow[];
@@ -80,6 +91,17 @@ export async function getReservationSlotById(slotId: string) {
     await supabaseAdmin.from("ReservationSlot").select("*").eq("id", slotId).maybeSingle(),
     "Failed to load reservation slot.",
   );
+}
+
+export async function getReservationSlotsByIds(slotIds: string[]) {
+  if (slotIds.length === 0) {
+    return [] satisfies ReservationSlotRow[];
+  }
+
+  return (requireData(
+    await supabaseAdmin.from("ReservationSlot").select("*").in("id", slotIds),
+    "Failed to load reservation slots by IDs.",
+  ) ?? []) as ReservationSlotRow[];
 }
 
 export async function getReservationSlotsByClassroom(grade: number, classroom: number) {

@@ -9,12 +9,12 @@ import {
   getReservationsBySlotIds,
   getReservationSlotById,
   getReservationSlotsByClassroom,
-  getTeacherNotifications,
   getTeacherUserById,
 } from "@/lib/db/queries";
 import type { ParentUserRow, ReservationRow, ReservationSlotRow } from "@/lib/db/types";
 import { ensureClassScheduleReady } from "@/lib/schedule";
 import { syncTeacherAccount } from "@/lib/teacher-accounts";
+import { getTeacherNotificationFeed } from "@/lib/teacher-notifications";
 import {
   buildWeekdayDateKeys,
   formatDateKeyFull,
@@ -360,19 +360,13 @@ export async function getTeacherDashboardData(teacherUserId: string) {
   await ensureClassScheduleReady(context.grade, context.classroom);
   const [slots, notifications] = await Promise.all([
     getReservationSlotsByClassroom(context.grade, context.classroom),
-    getTeacherNotifications(context.teacherUserId, 12),
+    getTeacherNotificationFeed(context.teacherUserId, 12),
   ]);
 
   return {
     ...context.base,
     summary: buildDailySummary(slots),
-    notifications: notifications.map((notification) => ({
-      id: notification.id,
-      title: notification.title,
-      message: notification.message,
-      isRead: notification.isRead,
-      createdAt: notification.createdAt,
-    })),
+    notifications,
   };
 }
 

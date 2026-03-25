@@ -277,7 +277,7 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
                         {notification.message}
                       </p>
                       <p className="mt-3 text-xs font-medium text-[color:var(--text-muted)]">
-                        {formatFullDate(new Date(notification.createdAt))}
+                        {notification.scheduleLabel ?? formatFullDate(notification.createdAt)}
                       </p>
                     </div>
 
