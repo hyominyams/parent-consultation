@@ -72,12 +72,38 @@ function getDayStatus(stats: ReturnType<typeof getDayStats>) {
 
 function getSlotTone(slot: SlotItem) {
   if (slot.status === "BOOKED") {
+    if (slot.reservedConsultationType === "PHONE") {
+      return {
+        label: "예약됨",
+        className:
+          "border border-emerald-200 bg-emerald-50/90 text-emerald-950 shadow-[0_10px_24px_rgba(5,150,105,0.10)]",
+        badgeClassName: "bg-white/90 text-emerald-800 ring-1 ring-emerald-200/70",
+        timeClassName: "text-emerald-950",
+        subTimeClassName: "text-emerald-700/85",
+        hintClassName: "text-emerald-700/90",
+      };
+    }
+
+    if (slot.reservedConsultationType === "IN_PERSON") {
+      return {
+        label: "예약됨",
+        className:
+          "border border-amber-200 bg-amber-50/90 text-amber-950 shadow-[0_10px_24px_rgba(217,119,6,0.10)]",
+        badgeClassName: "bg-white/90 text-amber-800 ring-1 ring-amber-200/70",
+        timeClassName: "text-amber-950",
+        subTimeClassName: "text-amber-700/85",
+        hintClassName: "text-amber-700/90",
+      };
+    }
+
     return {
       label: "예약됨",
       className:
         "border border-primary/15 bg-primary-container/80 text-primary-dim shadow-[0_10px_24px_rgba(26,95,122,0.08)]",
       badgeClassName: "bg-white/90 text-primary-dim ring-1 ring-primary/10",
-      timeTone: "booked" as const,
+      timeClassName: "text-primary-dim",
+      subTimeClassName: "text-primary/80",
+      hintClassName: "text-primary/80",
     };
   }
 
@@ -87,7 +113,8 @@ function getSlotTone(slot: SlotItem) {
       className:
         "border border-[color:var(--surface-container-high)] bg-[color:var(--surface-container)] text-[color:var(--text-strong)]",
       badgeClassName: "bg-white/70 text-[color:var(--text-muted)]",
-      timeTone: "default" as const,
+      timeClassName: "text-[color:var(--text-strong)]",
+      subTimeClassName: "text-[color:var(--text-muted)]",
     };
   }
 
@@ -96,53 +123,40 @@ function getSlotTone(slot: SlotItem) {
     className:
       "border border-[color:var(--surface-container-high)] bg-[color:var(--surface-container-lowest)] text-[color:var(--text-strong)] hover:border-[color:var(--primary)]/25 hover:shadow-[0_12px_30px_rgba(30,57,75,0.08)]",
     badgeClassName: "bg-white/70 text-[color:var(--primary)]",
-    timeTone: "default" as const,
+    timeClassName: "text-[color:var(--text-strong)]",
+    subTimeClassName: "text-[color:var(--text-muted)]",
   };
 }
 
 function SlotTimeLabel({
   startLabel,
   endLabel,
-  tone = "default",
+  timeClassName,
+  subTimeClassName,
 }: {
   startLabel: string;
   endLabel: string;
-  tone?: "default" | "booked";
+  timeClassName?: string;
+  subTimeClassName?: string;
 }) {
   return (
-    <span className="flex flex-col leading-tight">
+    <span className="flex min-w-0 flex-col leading-tight">
       <span
         className={cn(
-          "text-[0.98rem] font-semibold",
-          tone === "booked" ? "text-primary-dim" : "text-[color:var(--text-strong)]",
+          "truncate whitespace-nowrap text-[0.98rem] font-semibold text-[color:var(--text-strong)]",
+          timeClassName,
         )}
       >
         {startLabel}
       </span>
       <span
         className={cn(
-          "mt-0.5 text-[12px] font-medium",
-          tone === "booked" ? "text-primary/80" : "text-[color:var(--text-muted)]",
+          "mt-0.5 truncate whitespace-nowrap text-[12px] font-medium text-[color:var(--text-muted)]",
+          subTimeClassName,
         )}
       >
         종료 {endLabel}
       </span>
-    </span>
-  );
-}
-
-function ConsultationBadge({
-  type,
-}: {
-  type: NonNullable<SlotItem["reservedConsultationType"]>;
-}) {
-  return type === "PHONE" ? (
-    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-      전화 상담
-    </span>
-  ) : (
-    <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
-      대면 상담
     </span>
   );
 }
@@ -406,7 +420,7 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
           <p className="text-sm leading-6 text-[color:var(--text-soft)]">조정할 날짜 정보가 없습니다.</p>
         </Card>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-5">
+        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr))]">
           {selectedDays.map((day) => {
             const stats = getDayStats(day);
             const canToggle = stats.modifiableCount > 0;
@@ -462,15 +476,13 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                               <SlotTimeLabel
                                 startLabel={slot.startLabel}
                                 endLabel={slot.endLabel}
-                                tone={slotTone.timeTone}
+                                timeClassName={slotTone.timeClassName}
+                                subTimeClassName={slotTone.subTimeClassName}
                               />
-                              <div className="flex flex-col items-end gap-2">
-                                {slot.reservedConsultationType ? (
-                                  <ConsultationBadge type={slot.reservedConsultationType} />
-                                ) : null}
+                              <div className="flex min-w-0 flex-col items-end gap-2">
                                 <span
                                   className={cn(
-                                    "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                                    "max-w-full shrink-0 truncate rounded-full px-2.5 py-1 text-[11px] font-semibold",
                                     slotTone.badgeClassName,
                                   )}
                                 >
@@ -478,7 +490,12 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                                 </span>
                               </div>
                             </div>
-                            <p className="mt-3 text-[12px] font-medium text-primary/80">
+                            <p
+                              className={cn(
+                                "mt-3 text-[12px] font-medium",
+                                slotTone.hintClassName ?? "text-primary/80",
+                              )}
+                            >
                               {isExpandedBooked ? "신청자 정보 접기" : "클릭해 신청자 정보 확인"}
                             </p>
                           </button>
@@ -502,7 +519,8 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                           <SlotTimeLabel
                             startLabel={slot.startLabel}
                             endLabel={slot.endLabel}
-                            tone={slotTone.timeTone}
+                            timeClassName={slotTone.timeClassName}
+                            subTimeClassName={slotTone.subTimeClassName}
                           />
                           <span
                             className={cn(
@@ -523,29 +541,18 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                         onClick={() => handleOpenSlotSelect(day.dateKey, slot.id)}
                         disabled={pending}
                         className={cn(
-                          "flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all disabled:opacity-60",
+                          "grid w-full grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-xl px-3.5 py-3 text-left transition-all disabled:opacity-60",
                           slotTone.className,
                           isSelectedOpen && "border-[color:var(--primary)]/30 bg-[color:var(--primary-container)]/30",
                         )}
                       >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <SelectionCheckbox checked={isSelectedOpen} />
-                          <SlotTimeLabel
-                            startLabel={slot.startLabel}
-                            endLabel={slot.endLabel}
-                            tone={slotTone.timeTone}
-                          />
-                        </div>
-                        <span
-                          className={cn(
-                            "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                            isSelectedOpen
-                              ? "bg-white text-[color:var(--primary)]"
-                              : slotTone.badgeClassName,
-                          )}
-                        >
-                          {isSelectedOpen ? "선택됨" : "체크"}
-                        </span>
+                        <SelectionCheckbox checked={isSelectedOpen} />
+                        <SlotTimeLabel
+                          startLabel={slot.startLabel}
+                          endLabel={slot.endLabel}
+                          timeClassName={slotTone.timeClassName}
+                          subTimeClassName={slotTone.subTimeClassName}
+                        />
                       </button>
                     );
                   })}
