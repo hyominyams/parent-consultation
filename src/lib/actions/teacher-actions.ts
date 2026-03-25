@@ -10,6 +10,7 @@ import { combineKstDateTime } from "@/lib/utils";
 import {
   teacherDateAvailabilitySchema,
   teacherNotificationSchema,
+  teacherSlotBatchSchema,
   teacherSlotToggleSchema,
   teacherWeekConfigSchema,
 } from "@/lib/validators";
@@ -78,6 +79,84 @@ export async function toggleTeacherSlotAction(slotId: string): Promise<ActionSta
       slot.status === "BLOCKED"
         ? "슬롯을 다시 신청 가능 상태로 열었습니다."
         : "슬롯을 신청 불가 상태로 변경했습니다.",
+  };
+}
+
+export async function blockTeacherSlotsAction(slotIds: string[]): Promise<ActionState> {
+  const session = await requireTeacherSession();
+  const uniqueSlotIds = Array.from(new Set(slotIds));
+  const parsed = teacherSlotBatchSchema.safeParse({ slotIds: uniqueSlotIds });
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: "닫을 시간대를 다시 선택해주세요.",
+    };
+  }
+
+  const { data: slots, error: slotError } = await supabaseAdmin
+    .from("ReservationSlot")
+    .select("id, grade, classroom, status")
+    .in("id", parsed.data.slotIds);
+
+  if (slotError) {
+    return {
+      status: "error",
+      message: "선택한 슬롯 정보를 불러오는 중 문제가 발생했습니다.",
+    };
+  }
+
+  if (!slots || slots.length !== parsed.data.slotIds.length) {
+    return {
+      status: "error",
+      message: "선택한 슬롯 중 일부를 찾을 수 없습니다. 화면을 새로고침 후 다시 시도해주세요.",
+    };
+  }
+
+  if (slots.some((slot) => slot.grade !== session.grade || slot.classroom !== session.classroom)) {
+    return {
+      status: "error",
+      message: "해당 슬롯에 접근할 수 없습니다.",
+    };
+  }
+
+  if (slots.some((slot) => slot.status !== "OPEN")) {
+    return {
+      status: "error",
+      message: "이미 닫혔거나 예약된 시간이 포함되어 있습니다. 화면을 새로고침 후 다시 선택해주세요.",
+    };
+  }
+
+  const reservations = await getReservationsBySlotIds(parsed.data.slotIds);
+
+  if (reservations.length > 0) {
+    return {
+      status: "error",
+      message: "이미 예약된 시간이 포함되어 있습니다. 화면을 새로고침 후 다시 선택해주세요.",
+    };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("ReservationSlot")
+    .update({
+      status: "BLOCKED",
+      updatedAt: new Date().toISOString(),
+    })
+    .in("id", parsed.data.slotIds);
+
+  if (error) {
+    return {
+      status: "error",
+      message: "선택한 시간대를 닫는 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    };
+  }
+
+  revalidateTeacherPortal();
+  revalidatePath("/reserve");
+
+  return {
+    status: "success",
+    message: `체크한 ${parsed.data.slotIds.length}개 시간대를 신청 불가 상태로 변경했습니다.`,
   };
 }
 

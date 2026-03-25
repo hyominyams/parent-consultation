@@ -47,6 +47,10 @@ export const teacherSlotToggleSchema = z.object({
   slotId: entityIdSchema,
 });
 
+export const teacherSlotBatchSchema = z.object({
+  slotIds: z.array(entityIdSchema).min(1, "시간대를 한 개 이상 선택해주세요."),
+});
+
 export const teacherDateAvailabilitySchema = z.object({
   dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "날짜 형식을 다시 확인해주세요."),
 });

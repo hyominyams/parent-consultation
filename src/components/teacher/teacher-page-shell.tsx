@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 const TEACHER_PAGE_LINKS = [
   { href: "/teacher/dashboard", label: "대시보드", icon: GraduationCap },
   { href: "/teacher/settings", label: "상담 설정", icon: Settings2 },
-  { href: "/teacher/availability", label: "일정 관리", icon: CalendarClock },
+  { href: "/teacher/availability", label: "일정 관리/확인", icon: CalendarClock },
 ] as const;
 
 type TeacherPageShellProps = {

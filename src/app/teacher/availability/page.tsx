@@ -16,8 +16,8 @@ export default async function TeacherAvailabilityPage() {
   return (
     <TeacherPageShell
       currentPath="/teacher/availability"
-      title="날짜 조정"
-      description="날짜와 시간대별 상담 가능 상태를 직접 조정합니다."
+      title="일정 관리/확인"
+      description="시간대 상태를 조정하고, 예약된 신청자 정보도 같은 화면에서 바로 확인합니다."
       teacherName={data.teacher.name}
       classLabel={data.teacher.classLabel}
       unreadCount={data.unreadCount}

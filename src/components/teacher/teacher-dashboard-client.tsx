@@ -30,10 +30,10 @@ type TeacherDashboardClientProps = {
 const QUICK_LINKS = [
   {
     href: "/teacher/availability",
-    title: "일정 관리",
-    summary: "날짜별, 시간대별 상담 가능 상태를 조정합니다.",
+    title: "일정 관리/확인",
+    summary: "시간대를 조정하고 예약된 신청자 정보도 함께 확인합니다.",
     icon: CalendarClock,
-    cta: "일정 관리 열기",
+    cta: "일정 관리/확인 열기",
   },
   {
     href: "/teacher/settings",
@@ -147,7 +147,7 @@ export function TeacherDashboardClient({ data }: TeacherDashboardClientProps) {
               <Button asChild className="rounded-xl px-5 text-base !text-white [&_svg]:!text-white">
                 <Link href="/teacher/availability">
                   <CalendarRange className="h-[18px] w-[18px]" />
-                  일정 관리
+                  일정 관리/확인
                 </Link>
               </Button>
               <Button asChild variant="soft" className="rounded-xl px-5 text-base">

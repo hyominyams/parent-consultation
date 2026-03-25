@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalendarClock, Lock, Unlock } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarDays,
+  Check,
+  Lock,
+  Unlock,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
+  blockTeacherSlotsAction,
   toggleTeacherDateAvailabilityAction,
   toggleTeacherSlotAction,
 } from "@/lib/actions/teacher-actions";
@@ -21,6 +28,18 @@ type TeacherAvailabilityClientProps = {
 
 type DayItem = TeacherAvailabilityData["weeks"][number]["days"][number];
 type SlotItem = DayItem["slots"][number];
+type ExpandedBookedSlot = {
+  dateKey: string;
+  slotId: string;
+} | null;
+
+const RESERVATION_CREATED_AT_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul",
+  month: "numeric",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 function getDayStats(day: DayItem) {
   const openSlots = day.slots.filter((slot) => slot.status === "OPEN");
@@ -112,10 +131,120 @@ function SlotTimeLabel({
   );
 }
 
+function ConsultationBadge({
+  type,
+}: {
+  type: NonNullable<SlotItem["reservedConsultationType"]>;
+}) {
+  return type === "PHONE" ? (
+    <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+      전화 상담
+    </span>
+  ) : (
+    <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-200">
+      대면 상담
+    </span>
+  );
+}
+
+function SelectionCheckbox({ checked }: { checked: boolean }) {
+  return (
+    <span
+      className={cn(
+        "flex h-5 w-5 items-center justify-center rounded-md border transition-colors",
+        checked
+          ? "border-[color:var(--primary)] bg-[color:var(--primary)] text-white"
+          : "border-[color:var(--surface-container-highest)] bg-white text-transparent",
+      )}
+    >
+      <Check className="h-3.5 w-3.5" />
+    </span>
+  );
+}
+
+function formatReservationCreatedAt(value?: string) {
+  if (!value) {
+    return "-";
+  }
+
+  return `${RESERVATION_CREATED_AT_FORMATTER.format(new Date(value))} 신청`;
+}
+
+function BookedSlotDetails({
+  day,
+  slot,
+}: {
+  day: DayItem;
+  slot: SlotItem;
+}) {
+  const consultationLabel =
+    slot.reservedConsultationType === "PHONE"
+      ? "전화 상담"
+      : slot.reservedConsultationType === "IN_PERSON"
+        ? "대면 상담"
+        : "-";
+
+  return (
+    <div className="mt-3 rounded-[1.35rem] border border-[color:var(--surface-container-high)] bg-white/90 p-4">
+      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[color:var(--text-strong)]">
+        <CalendarDays className="h-4 w-4 text-[color:var(--primary)]" />
+        신청자 정보
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl bg-[color:var(--surface-container-low)] px-4 py-3">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--text-muted)] uppercase">
+            학생
+          </p>
+          <p className="mt-2 text-sm font-semibold text-[color:var(--text-strong)]">
+            {slot.reservedStudentName ?? "-"}
+          </p>
+        </div>
+        <div className="rounded-xl bg-[color:var(--surface-container-low)] px-4 py-3">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--text-muted)] uppercase">
+            학부모
+          </p>
+          <p className="mt-2 text-sm font-semibold text-[color:var(--text-strong)]">
+            {slot.reservedParentName ?? "-"}
+          </p>
+        </div>
+        <div className="rounded-xl bg-[color:var(--surface-container-low)] px-4 py-3">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--text-muted)] uppercase">
+            연락처
+          </p>
+          <p className="mt-2 text-sm font-semibold text-[color:var(--text-strong)]">
+            {slot.reservedPhone ?? "-"}
+          </p>
+        </div>
+        <div className="rounded-xl bg-[color:var(--surface-container-low)] px-4 py-3">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--text-muted)] uppercase">
+            상담 방식
+          </p>
+          <p className="mt-2 text-sm font-semibold text-[color:var(--text-strong)]">
+            {consultationLabel}
+          </p>
+        </div>
+        <div className="rounded-xl bg-[color:var(--surface-container-low)] px-4 py-3 sm:col-span-2">
+          <p className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--text-muted)] uppercase">
+            상담 일시 / 신청 시각
+          </p>
+          <p className="mt-2 text-sm font-semibold text-[color:var(--text-strong)]">
+            {day.fullLabel} {slot.startLabel} - {slot.endLabel}
+          </p>
+          <p className="mt-1 text-sm text-[color:var(--text-soft)]">
+            {formatReservationCreatedAt(slot.reservationCreatedAt)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientProps) {
   const router = useRouter();
   const [selectedWeekKey, setSelectedWeekKey] = useState(data.weeks[0]?.weekKey ?? "");
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [selectedOpenSlotsByDate, setSelectedOpenSlotsByDate] = useState<Record<string, string[]>>({});
+  const [expandedBookedSlot, setExpandedBookedSlot] = useState<ExpandedBookedSlot>(null);
   const [pending, startTransition] = useTransition();
 
   const selectedWeek = data.weeks.find((week) => week.weekKey === selectedWeekKey) ?? data.weeks[0] ?? null;
@@ -166,6 +295,59 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
     });
   }
 
+  function handleOpenSlotSelect(dateKey: string, slotId: string) {
+    setSelectedOpenSlotsByDate((current) => {
+      const currentIds = current[dateKey] ?? [];
+      const nextIds = currentIds.includes(slotId)
+        ? currentIds.filter((id) => id !== slotId)
+        : [...currentIds, slotId];
+
+      if (nextIds.length === 0) {
+        const next = { ...current };
+        delete next[dateKey];
+        return next;
+      }
+
+      return {
+        ...current,
+        [dateKey]: nextIds,
+      };
+    });
+  }
+
+  function handleBookedSlotClick(dateKey: string, slotId: string) {
+    setExpandedBookedSlot((current) =>
+      current?.dateKey === dateKey && current.slotId === slotId ? null : { dateKey, slotId },
+    );
+  }
+
+  function clearSelectedOpenSlots(dateKey: string) {
+    setSelectedOpenSlotsByDate((current) => {
+      const next = { ...current };
+      delete next[dateKey];
+      return next;
+    });
+  }
+
+  function handleBatchBlock(dateKey: string, slotIds: string[]) {
+    setPendingKey(`batch:${dateKey}`);
+
+    startTransition(async () => {
+      try {
+        const result = await blockTeacherSlotsAction(slotIds);
+        announce(result.message, result.status === "error");
+
+        if (result.status !== "error") {
+          clearSelectedOpenSlots(dateKey);
+        }
+
+        router.refresh();
+      } finally {
+        setPendingKey(null);
+      }
+    });
+  }
+
   return (
     <div className="grid gap-4">
       <Card className="overflow-hidden border border-black/5 bg-white p-0 shadow-[0_20px_60px_rgba(30,57,75,0.06)]">
@@ -173,14 +355,14 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-2xl">
               <Badge variant="primary" className="rounded-full px-4 py-1.5 font-bold tracking-[0.16em] uppercase">
-                Availability
+                Schedule
               </Badge>
               <h2 className="mt-4 font-display text-3xl font-extrabold tracking-[-0.04em] text-[color:var(--text-strong)]">
-                날짜별, 시간대별 일정 관리
+                날짜별 일정 관리/확인
               </h2>
               <p className="mt-3 text-sm leading-6 text-[color:var(--text-soft)]">
-                날짜 전체를 닫거나 다시 열 수 있고, 개별 시간도 직접 열고 닫을 수 있습니다. 이미
-                예약된 시간은 변경되지 않습니다.
+                열린 시간은 체크해서 여러 개를 한 번에 닫을 수 있고, 닫힌 시간은 다시 열 수 있습니다.
+                예약된 시간은 클릭하면 신청자 정보를 바로 확인할 수 있습니다.
               </p>
             </div>
 
@@ -230,11 +412,10 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
             const canToggle = stats.modifiableCount > 0;
             const shouldOpen = stats.openCount === 0 && stats.blockedCount > 0;
             const statusBadge = getDayStatus(stats);
-            const dayActionLabel = pendingKey === `date:${day.dateKey}`
-              ? "처리 중..."
-              : shouldOpen
-                ? "이 날짜 다시 열기"
-                : "남은 시간 전체 닫기";
+            const selectedOpenSlotIds = (selectedOpenSlotsByDate[day.dateKey] ?? []).filter((slotId) =>
+              day.slots.some((slot) => slot.id === slotId && slot.status === "OPEN")
+            );
+            const selectedOpenCount = selectedOpenSlotIds.length;
             const DayActionIcon = shouldOpen ? Unlock : Lock;
 
             return (
@@ -261,73 +442,154 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                   {day.slots.map((slot) => {
                     const slotTone = getSlotTone(slot);
                     const isBooked = slot.status === "BOOKED";
+                    const isSelectedOpen = selectedOpenSlotIds.includes(slot.id);
+                    const isExpandedBooked =
+                      expandedBookedSlot?.dateKey === day.dateKey && expandedBookedSlot.slotId === slot.id;
 
-                    return isBooked ? (
-                      <div
-                        key={slot.id}
-                        className={cn(
-                          "flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-left",
-                          slotTone.className,
-                        )}
-                      >
-                        <SlotTimeLabel
-                          startLabel={slot.startLabel}
-                          endLabel={slot.endLabel}
-                          tone={slotTone.timeTone}
-                        />
-                        <span
+                    if (isBooked) {
+                      return (
+                        <div key={slot.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleBookedSlotClick(day.dateKey, slot.id)}
+                            className={cn(
+                              "w-full rounded-xl px-4 py-3 text-left transition-all",
+                              slotTone.className,
+                              isExpandedBooked && "ring-2 ring-[color:var(--primary)]/15",
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <SlotTimeLabel
+                                startLabel={slot.startLabel}
+                                endLabel={slot.endLabel}
+                                tone={slotTone.timeTone}
+                              />
+                              <div className="flex flex-col items-end gap-2">
+                                {slot.reservedConsultationType ? (
+                                  <ConsultationBadge type={slot.reservedConsultationType} />
+                                ) : null}
+                                <span
+                                  className={cn(
+                                    "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                                    slotTone.badgeClassName,
+                                  )}
+                                >
+                                  {slot.reservedStudentName ?? slotTone.label}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="mt-3 text-[12px] font-medium text-primary/80">
+                              {isExpandedBooked ? "신청자 정보 접기" : "클릭해 신청자 정보 확인"}
+                            </p>
+                          </button>
+                          {isExpandedBooked ? <BookedSlotDetails day={day} slot={slot} /> : null}
+                        </div>
+                      );
+                    }
+
+                    if (slot.status === "BLOCKED") {
+                      return (
+                        <button
+                          key={slot.id}
+                          type="button"
+                          onClick={() => handleToggleSlot(slot.id)}
+                          disabled={pending}
                           className={cn(
-                            "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                            slotTone.badgeClassName,
+                            "flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all disabled:opacity-60",
+                            slotTone.className,
                           )}
                         >
-                          {slot.reservedStudentName ?? slotTone.label}
-                        </span>
-                      </div>
-                    ) : (
+                          <SlotTimeLabel
+                            startLabel={slot.startLabel}
+                            endLabel={slot.endLabel}
+                            tone={slotTone.timeTone}
+                          />
+                          <span
+                            className={cn(
+                              "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                              slotTone.badgeClassName,
+                            )}
+                          >
+                            {pendingKey === `slot:${slot.id}` ? "처리 중..." : "다시 열기"}
+                          </span>
+                        </button>
+                      );
+                    }
+
+                    return (
                       <button
                         key={slot.id}
                         type="button"
-                        onClick={() => handleToggleSlot(slot.id)}
+                        onClick={() => handleOpenSlotSelect(day.dateKey, slot.id)}
                         disabled={pending}
                         className={cn(
-                          "flex items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all disabled:opacity-60",
+                          "flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left transition-all disabled:opacity-60",
                           slotTone.className,
+                          isSelectedOpen && "border-[color:var(--primary)]/30 bg-[color:var(--primary-container)]/30",
                         )}
                       >
-                        <SlotTimeLabel
-                          startLabel={slot.startLabel}
-                          endLabel={slot.endLabel}
-                          tone={slotTone.timeTone}
-                        />
+                        <div className="flex min-w-0 items-center gap-3">
+                          <SelectionCheckbox checked={isSelectedOpen} />
+                          <SlotTimeLabel
+                            startLabel={slot.startLabel}
+                            endLabel={slot.endLabel}
+                            tone={slotTone.timeTone}
+                          />
+                        </div>
                         <span
                           className={cn(
                             "shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold",
-                            slotTone.badgeClassName,
+                            isSelectedOpen
+                              ? "bg-white text-[color:var(--primary)]"
+                              : slotTone.badgeClassName,
                           )}
                         >
-                          {pendingKey === `slot:${slot.id}` ? "처리 중..." : slotTone.label}
+                          {isSelectedOpen ? "선택됨" : "체크"}
                         </span>
                       </button>
                     );
                   })}
                 </div>
                 <div className="mt-4 border-t border-[color:var(--surface-container-high)] pt-4">
-                  {canToggle ? (
+                  {selectedOpenCount > 0 ? (
                     <Button
                       type="button"
                       size="sm"
-                      variant={shouldOpen ? "primary" : "danger"}
+                      variant="danger"
+                      onClick={() => handleBatchBlock(day.dateKey, selectedOpenSlotIds)}
+                      disabled={pending}
+                      className="h-auto min-h-10 w-full rounded-xl px-4 py-2 whitespace-normal"
+                    >
+                      <span className="grid w-full grid-cols-[1rem_minmax(0,1fr)_auto] items-center gap-2">
+                        <Lock aria-hidden="true" className="pointer-events-none h-4 w-4 shrink-0" />
+                        <span className="text-center leading-tight break-keep">
+                          {pendingKey === `batch:${day.dateKey}` ? "닫는 중..." : "체크한 시간대 닫기"}
+                        </span>
+                        <span className="text-xs font-semibold">{selectedOpenCount}개</span>
+                      </span>
+                    </Button>
+                  ) : canToggle && shouldOpen ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
                       onClick={() => handleToggleDate(day.dateKey)}
                       disabled={pending}
                       className="h-auto min-h-10 w-full rounded-xl px-4 py-2 whitespace-normal"
                     >
                       <span className="grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center gap-2">
                         <DayActionIcon aria-hidden="true" className="pointer-events-none h-4 w-4 shrink-0" />
-                        <span className="text-center leading-tight break-keep">{dayActionLabel}</span>
+                        <span className="text-center leading-tight break-keep">
+                          {pendingKey === `date:${day.dateKey}` ? "처리 중..." : "이 날짜 다시 열기"}
+                        </span>
                         <span aria-hidden="true" className="h-4 w-4 shrink-0" />
                       </span>
                     </Button>
+                  ) : canToggle ? (
+                    <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--surface-container-low)] px-3 py-3 text-sm text-[color:var(--text-soft)]">
+                      <CalendarClock className="h-4 w-4" />
+                      열린 시간을 체크해 한 번에 닫을 수 있습니다.
+                    </div>
                   ) : (
                     <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--surface-container-low)] px-3 py-3 text-sm text-[color:var(--text-soft)]">
                       <CalendarClock className="h-4 w-4" />
