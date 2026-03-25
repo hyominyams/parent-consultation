@@ -320,13 +320,13 @@ export function TeacherAvailabilityClient({ data }: TeacherAvailabilityClientPro
                       variant={shouldOpen ? "primary" : "danger"}
                       onClick={() => handleToggleDate(day.dateKey)}
                       disabled={pending}
-                      className="relative w-full rounded-xl text-center"
+                      className="h-auto min-h-10 w-full rounded-xl px-4 py-2 whitespace-normal"
                     >
-                      <DayActionIcon
-                        aria-hidden="true"
-                        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2"
-                      />
-                      <span className="mx-auto">{dayActionLabel}</span>
+                      <span className="grid w-full grid-cols-[1rem_minmax(0,1fr)_1rem] items-center gap-2">
+                        <DayActionIcon aria-hidden="true" className="pointer-events-none h-4 w-4 shrink-0" />
+                        <span className="text-center leading-tight break-keep">{dayActionLabel}</span>
+                        <span aria-hidden="true" className="h-4 w-4 shrink-0" />
+                      </span>
                     </Button>
                   ) : (
                     <div className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--surface-container-low)] px-3 py-3 text-sm text-[color:var(--text-soft)]">
